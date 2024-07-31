@@ -1,0 +1,38 @@
+[
+    {
+      "name": "John Doe",
+      "totalAmount": 5000,
+      "amountRemaining": 2500,
+      "startDate": "2023-01-01",
+      "endDate": "2023-12-31"
+    },
+    {
+      "name": "Jane Smith",
+      "totalAmount": 3000,
+      "amountRemaining": 1500,
+      "startDate": "2023-02-01",
+      "endDate": "2023-11-30"
+    },
+    {
+      "name": "Alice Johnson",
+      "totalAmount": 4000,
+      "amountRemaining": 2000,
+      "startDate": "2023-03-01",
+      "endDate": "2023-10-31"
+    },
+    {
+      "name": "Bob Brown",
+      "totalAmount": 6000,
+      "amountRemaining": 3000,
+      "startDate": "2023-04-01",
+      "endDate": "2023-09-30"
+    },
+    {
+      "name": "Charlie Green",
+      "totalAmount": 4500,
+      "amountRemaining": 2250,
+      "startDate": "2023-05-01",
+      "endDate": "2023-08-31"
+    }
+  ]
+  

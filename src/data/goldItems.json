@@ -1,0 +1,143 @@
+[
+    {
+      "gold_item_id": 1,
+      "category": "Earrings",
+      "item_description": "Diamond Stud Earrings",
+      "weight": 2.5,
+      "karat": 18,
+      "appraisal_value": 500.00,
+      "num_pieces": 1,
+      "photo": "/home/ap/Documents/gold-app/GLA/src/assests/images/gold.png"
+    },
+    {
+      "gold_item_id": 2,
+      "category": "Earrings",
+      "item_description": "Gold Hoop Earrings",
+      "weight": 3.2,
+      "karat": 22,
+      "appraisal_value": 650.00,
+      "num_pieces": 1,
+      "photo": "/home/ap/Documents/gold-app/GLA/src/assests/images/gold.png"
+    },
+    {
+      "gold_item_id": 3,
+      "category": "Necklaces",
+      "item_description": "Gold Chain Necklace",
+      "weight": 10.0,
+      "karat": 18,
+      "appraisal_value": 1200.00,
+      "num_pieces": 1,
+      "photo": "/home/ap/Documents/gold-app/GLA/src/assests/images/gold.png"
+    },
+    {
+      "gold_item_id": 4,
+      "category": "Necklaces",
+      "item_description": "Pearl Necklace",
+      "weight": 8.0,
+      "karat": 20,
+      "appraisal_value": 2000.00,
+      "num_pieces": 1,
+      "photo": "/home/ap/Documents/gold-app/GLA/src/assests/images/gold.png"
+    },
+    {
+      "gold_item_id": 5,
+      "category": "Rings",
+      "item_description": "Diamond Ring",
+      "weight": 1.0,
+      "karat": 18,
+      "appraisal_value": 1500.00,
+      "num_pieces": 1,
+      "photo": "/home/ap/Documents/gold-app/GLA/src/assests/images/gold.png"
+    },
+    {
+      "gold_item_id": 6,
+      "category": "Rings",
+      "item_description": "Gold Band",
+      "weight": 1.5,
+      "karat": 22,
+      "appraisal_value": 750.00,
+      "num_pieces": 1,
+      "photo": "/home/ap/Documents/gold-app/GLA/src/assests/images/gold.png"
+    },
+    {
+      "gold_item_id": 7,
+      "category": "Gold Bars",
+      "item_description": "24K Gold Bar",
+      "weight": 50.0,
+      "karat": 24,
+      "appraisal_value": 50000.00,
+      "num_pieces": 1,
+      "photo": "/home/ap/Documents/gold-app/GLA/src/assests/images/gold.png"
+    },
+    {
+      "gold_item_id": 8,
+      "category": "Gold Bars",
+      "item_description": "10K Gold Bar",
+      "weight": 25.0,
+      "karat": 10,
+      "appraisal_value": 12500.00,
+      "num_pieces": 1,
+      "photo": "/home/ap/Documents/gold-app/GLA/src/assests/images/gold.png"
+    },
+    {
+      "gold_item_id": 9,
+      "category": "Bracelets",
+      "item_description": "Gold Bracelet",
+      "weight": 7.0,
+      "karat": 18,
+      "appraisal_value": 800.00,
+      "num_pieces": 1,
+      "photo": "/home/ap/Documents/gold-app/GLA/src/assests/images/gold.png"
+    },
+    {
+      "gold_item_id": 10,
+      "category": "Bracelets",
+      "item_description": "Diamond Bracelet",
+      "weight": 5.0,
+      "karat": 22,
+      "appraisal_value": 1500.00,
+      "num_pieces": 1,
+      "photo": "/home/ap/Documents/gold-app/GLA/src/assests/images/gold.png"
+    },
+    {
+      "gold_item_id": 11,
+      "category": "Rings",
+      "item_description": "Gold Wedding Band",
+      "weight": 2.0,
+      "karat": 22,
+      "appraisal_value": 1000.00,
+      "num_pieces": 1,
+      "photo": "/home/ap/Documents/gold-app/GLA/src/assests/images/gold.png"
+    },
+    {
+      "gold_item_id": 12,
+      "category": "Earrings",
+      "item_description": "Gold Stud Earrings",
+      "weight": 1.8,
+      "karat": 18,
+      "appraisal_value": 400.00,
+      "num_pieces": 1,
+      "photo": "/home/ap/Documents/gold-app/GLA/src/assests/images/gold.png"
+    },
+    {
+      "gold_item_id": 13,
+      "category": "Necklaces",
+      "item_description": "Gold Pendant Necklace",
+      "weight": 6.0,
+      "karat": 22,
+      "appraisal_value": 900.00,
+      "num_pieces": 1,
+      "photo": "/home/ap/Documents/gold-app/GLA/src/assests/images/gold.png"
+    },
+    {
+      "gold_item_id": 14,
+      "category": "Bracelets",
+      "item_description": "Silver Bracelet",
+      "weight": 4.0,
+      "karat": 10,
+      "appraisal_value": 200.00,
+      "num_pieces": 1,
+      "photo": "/home/ap/Documents/gold-app/GLA/src/assests/images/gold.png"
+    }
+  ]
+  
