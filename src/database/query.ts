@@ -1,65 +1,3 @@
-// import { useSQLiteContext } from "expo-sqlite/next";
-
-// export type TransactionCreateDatabase = {
-//   amount: number;
-//   goalId: number;
-// };
-
-// export type TransactionResponseDatabase = {
-//   id: string;
-//   amount: number;
-//   goal_id: number;
-//   created_at: number;
-// };
-
-// export function useTransactionRepository() {
-//   const database = useSQLiteContext();
-
-//   function findLatest() {
-//     try {
-//       return database.getAllSync<TransactionResponseDatabase>(`
-//         SELECT * FROM transactions ORDER BY created_at DESC LIMIT 10
-//       `);
-//     } catch (error) {
-//       throw error;
-//     }
-//   }
-
-//   function findByGoalId(goalId: number) {
-//     try {
-//       const statement = database.prepareSync(`
-//         SELECT * FROM transactions WHERE goal_id = $goal_id
-//      `);
-
-//       const result = statement.executeSync<TransactionResponseDatabase>({
-//         $goal_id: goalId,
-//       });
-
-//       return result.getAllSync();
-//     } catch (error) {
-//       throw error;
-//     }
-//   }
-
-//   function create(transaction: TransactionCreateDatabase) {
-//     try {
-//       const statement = database.prepareSync(`
-//             INSERT INTO transactions (amount, goal_id) VALUES ($amount, $goal_id)
-//         `);
-
-//       statement.executeSync({
-//         $amount: transaction.amount,
-//         $goal_id: transaction.goalId,
-//       });
-//     } catch (error) {}
-//   }
-
-//   return {
-//     findLatest,
-//     findByGoalId,
-//     create,
-//   };
-// }
 
 import { useSQLiteContext } from "expo-sqlite/next";
 
@@ -145,6 +83,35 @@ export type LoanResponseDatabase = {
   payment_date: string;
   total_missed_payments: number;
 };
+
+export type LoanResponseDatabaseWithCustomer = {
+  loan_id: number;
+  customer_id: number;
+  loan_amount: number;
+  interest_rate: number;
+  start_date: string;
+  end_date: string;
+  status: string;
+  num_of_gold_items: number;
+  overdue_interest_rate: number;
+  payment_date: string;
+  total_missed_payments: number;
+  name: string;
+  date_of_birth: string;
+  gender: string;
+  marital_status: string;
+  pan_number: string;
+  address: string;
+  pincode: string;
+  state: string;
+  phone: string;
+  email: string;
+  account_number: string;
+  IFSC: string;
+  photo: string;
+  shop_id: number;
+};
+
 
 export type GoldItemResponseDatabase = {
   gold_item_id: number;
@@ -317,7 +284,25 @@ export function useRepository() {
       throw error;
     }
   }
-
+  function getAllLoansWithCustomer() {
+    try {
+      return database.getAllSync<LoanResponseDatabaseWithCustomer>(`
+        SELECT 
+          Loan.loan_id, Loan.customer_id, Loan.loan_amount, Loan.interest_rate, 
+          Loan.start_date, Loan.end_date, Loan.status, Loan.num_of_gold_items, 
+          Loan.overdue_interest_rate, Loan.payment_date, Loan.total_missed_payments,
+          Customer.name, Customer.date_of_birth, Customer.gender, Customer.marital_status, 
+          Customer.pan_number, Customer.address, Customer.pincode, Customer.state, 
+          Customer.phone, Customer.email, Customer.account_number, Customer.IFSC, 
+          Customer.photo, Customer.shop_id
+        FROM Loan 
+        LEFT JOIN Customer ON Loan.customer_id = Customer.customer_id
+      `);
+    } catch (error) {
+      throw error;
+    }
+  }
+  
   function getAllGoldItems() {
     try {
       return database.getAllSync<GoldItemResponseDatabase>(`
@@ -357,6 +342,8 @@ export function useRepository() {
     }
   }
 
+  
+
   return {
     insertCustomer,
     insertLoan,
@@ -367,6 +354,7 @@ export function useRepository() {
     getAllGoldItems,
     getAllPaymentsDueSoon,
     getAllPaymentsByLoanId,
+    getAllLoansWithCustomer,
   };
 }
 
