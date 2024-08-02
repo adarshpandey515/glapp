@@ -1,6 +1,6 @@
 
 import React from "react";
-
+import { ShowPayment } from "@/components/PaymentUpcoming";
 import { Text, TouchableOpacity, View } from "react-native";
 import {
   MapPin,
@@ -20,62 +20,6 @@ export default function Page() {
       <TopCard />
       <Statics />
       <ShowPayment />
-    </View>
-  );
-}
-
-export function ShowPayment() {
-  return (
-    <View className="w-full h-[50%] mt-9  pb-8 flex flex-col justify-stretch border-b-2 border-x-2 px-2 rounded-xl border-cpurple">
-          <Text className="text-cpurple text-center  border -top-4  rounded-full text-md  font-normal p-3 ">Upcoming Payments</Text>
-      <ScrollView className="w-full  ">
-    
-        <View className="w-full h-11 border-b-2 flex flex-row items-center justify-evenly ">
-          <Text>Name</Text>
-          <Text> Date</Text>
-          <Text>Amount</Text>
-        </View>
-        <View className="w-full h-11 border-b-2 flex flex-row items-center justify-evenly ">
-          <Text>Adarsh</Text>
-          <Text> 2/2/2024</Text>
-          <Text>1000</Text>
-        </View>
-        <View className="w-full h-11 border-b-2 flex flex-row items-center justify-evenly ">
-          <Text>Adarsh</Text>
-          <Text> 2/2/2024</Text>
-          <Text>1000</Text>
-        </View>
-        <View className="w-full h-11 border-b-2 flex flex-row items-center justify-evenly ">
-          <Text>Adarsh</Text>
-          <Text> 2/2/2024</Text>
-          <Text>1000</Text>
-        </View>
-        <View className="w-full h-11 border-b-2 flex flex-row items-center justify-evenly ">
-          <Text>Adarsh</Text>
-          <Text> 2/2/2024</Text>
-          <Text>1000</Text>
-        </View>
-        <View className="w-full h-11 border-b-2 flex flex-row items-center justify-evenly ">
-          <Text>Adarsh</Text>
-          <Text> 2/2/2024</Text>
-          <Text>1000</Text>
-        </View>
-        <View className="w-full h-11 border-b-2 flex flex-row items-center justify-evenly ">
-          <Text>Adarsh</Text>
-          <Text> 2/2/2024</Text>
-          <Text>1000</Text>
-        </View>
-        <View className="w-full h-11 border-b-2 flex flex-row items-center justify-evenly ">
-          <Text>Adarsh</Text>
-          <Text> 2/2/2024</Text>
-          <Text>1000</Text>
-        </View>
-        <View className="w-full h-11 border-b-2 flex flex-row items-center justify-evenly ">
-          <Text>Adarsh</Text>
-          <Text> 2/2/2024</Text>
-          <Text>1000</Text>
-        </View>
-      </ScrollView>
     </View>
   );
 }

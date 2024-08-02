@@ -126,6 +126,12 @@ export type GoldItemResponseDatabase = {
   num_pieces: number;
 };
 
+export type PaymentWithCustomerResponseDatabase = PaymentResponseDatabase & {
+  name: string;
+};
+
+
+
 export type PaymentResponseDatabase = {
   payment_id: number;
   gold_loan_id: number;
@@ -134,6 +140,9 @@ export type PaymentResponseDatabase = {
   amount: number;
   status: string;
 };
+
+
+
 
 export function useRepository() {
   const database = useSQLiteContext();
@@ -315,16 +324,44 @@ export function useRepository() {
 
   function getAllPaymentsDueSoon() {
     try {
-      return database.getAllSync<PaymentResponseDatabase>(`
-        SELECT * FROM Payment
-        WHERE status = 'pending'
-        AND (DATE(payment_date) < DATE('now') OR DATE(payment_date) BETWEEN DATE('now') AND DATE('now', '+10 days'))
-        ORDER BY payment_date ASC
+      return database.getAllSync<PaymentWithCustomerResponseDatabase>(`
+        SELECT Payment.*, Customer.name 
+        FROM Payment
+        INNER JOIN Loan ON Payment.gold_loan_id = Loan.loan_id
+        INNER JOIN Customer ON Loan.customer_id = Customer.customer_id
+        WHERE Payment.status != 'completed'
+        AND (
+          strftime('%Y-%m-%d', substr(Payment.payment_date, 7, 4) || '-' || substr(Payment.payment_date, 4, 2) || '-' || substr(Payment.payment_date, 1, 2)) < DATE('now')
+          OR strftime('%Y-%m-%d', substr(Payment.payment_date, 7, 4) || '-' || substr(Payment.payment_date, 4, 2) || '-' || substr(Payment.payment_date, 1, 2)) BETWEEN DATE('now') AND DATE('now', '+10 days')
+        )
+        ORDER BY strftime('%Y-%m-%d', substr(Payment.payment_date, 7, 4) || '-' || substr(Payment.payment_date, 4, 2) || '-' || substr(Payment.payment_date, 1, 2)) ASC
       `);
     } catch (error) {
       throw error;
     }
   }
+  
+  function updatePaymentStatus(paymentId: number, newStatus: string) {
+    try {
+      const statement = database.prepareSync(`
+        UPDATE Payment
+        SET status = $newStatus
+        WHERE payment_id = $paymentId
+      `);
+  
+      statement.executeSync({
+        $newStatus: newStatus,
+        $paymentId: paymentId,
+      });
+  
+      console.log(`Payment ID ${paymentId} status updated to ${newStatus}`);
+    } catch (error) {
+      console.error(`Failed to update status for payment ID ${paymentId}:`, error);
+      throw error;
+    }
+  }
+  
+  
 
   function getAllPaymentsByLoanId(loanId: number) {
     try {
@@ -342,6 +379,26 @@ export function useRepository() {
     }
   }
 
+  function getAllGoldItemsByLoanId(loanId: number): GoldItemResponseDatabase[] {
+    try {
+      // Prepare the SQL statement
+      const statement = database.prepareSync(`
+        SELECT * FROM GoldItem WHERE loan_id = $gold_loan_id
+      `);
+  
+      // Execute the statement with the loanId parameter
+      const result = statement.executeSync<GoldItemResponseDatabase>({
+        $gold_loan_id: loanId,
+      });
+  
+      // Return the results
+      return result.getAllSync();
+    } catch (error) {
+      throw error;
+    }
+  }
+  
+
   
 
   return {
@@ -355,6 +412,8 @@ export function useRepository() {
     getAllPaymentsDueSoon,
     getAllPaymentsByLoanId,
     getAllLoansWithCustomer,
+    getAllGoldItemsByLoanId,
+    updatePaymentStatus,
   };
 }
 

@@ -86,6 +86,7 @@ export default function AddLoan() {
 
   const fetchCustomers = async () => {
     const customers = await getAllCustomers();
+    setFilteredCustomers(customers)
     setCustomers(customers);
   };
 
@@ -109,6 +110,7 @@ export default function AddLoan() {
       quality: 0.5,
       allowsEditing: true,
       base64: true,
+      aspect:[1,1],
       mediaTypes: ImagePicker.MediaTypeOptions.All,
     });
     if (!result.canceled && result.assets[0].base64) {
@@ -125,6 +127,7 @@ export default function AddLoan() {
       // use ImagePicker.launchCameraAsync for camera opening
       quality: 0.5,
       allowsEditing: true,
+      aspect:[1,1],
       base64: true,
       mediaTypes: ImagePicker.MediaTypeOptions.All,
     });
@@ -138,6 +141,27 @@ export default function AddLoan() {
   };
 
   const handleSaveCustomer = async () => {
+    if (!photoBase64) {
+      Alert.alert("Please upload a photo.");
+      return;
+    }else if (!customerForm.date_of_birth || customerForm.date_of_birth === "Select Date" || customerForm.date_of_birth === "" || customerForm.date_of_birth === null || parseDate(customerForm.date_of_birth) > new Date()) {
+      Alert.alert("Date of Birth invalid.");
+      return;
+    }else if (!customerForm.name ) {
+      Alert.alert("Please enter a name.");
+      return;
+    }else if (!customerForm.pan_number ) {
+      Alert.alert("Please enter a PAN number.");
+      return;
+    }else if (!customerForm.phone || customerForm.phone.length >=15) {
+      Alert.alert("Please enter a Valid phone no.");
+      return;
+    }else if (!customerForm.email || !customerForm.email.includes("@") || !customerForm.email.includes(".") || customerForm.email.length < 5) {
+      Alert.alert("Please enter an Valid email.");
+      return;
+    }
+
+
     if (
       !customerForm.name ||
       !customerForm.pan_number ||
@@ -157,36 +181,65 @@ export default function AddLoan() {
   };
 
   const handleSaveLoan = async () => {
-    if (
-      !loanForm.loan_amount ||
-      !loanForm.interest_rate ||
-      !loanForm.end_date ||
-      !loanForm.customer_id 
-    ) {
-      Alert.alert("Please fill out all required fields.");
+    if(!loanForm.customer_id){
+      Alert.alert("Please select a customer.");
+      return;
+    }else if( loanForm.loan_amount < 0 || loanForm.loan_amount == null){
+      Alert.alert("Loan amount must be greater equal to 0.");
+      return;
+    }else if(!loanForm.interest_rate 
+      || loanForm.interest_rate < 0 || loanForm.interest_rate == null){
+      Alert.alert("Interest rate must be greater than 0.");
+      return;
+    }else if(!loanForm.num_of_gold_items || loanForm.num_of_gold_items <= 0 || loanForm.num_of_gold_items == null){
+      Alert.alert("Number of gold items must be greater than 0.");
+      return;
+    }else if(!loanForm.overdue_interest_rate || loanForm.overdue_interest_rate <0 || loanForm.overdue_interest_rate == null){
+      Alert.alert("Overdue interest rate must be greater equal to   0.");
+      return;
+    }else if(!loanForm.end_date || !loanForm.start_date ||  parseDate(loanForm.start_date) > parseDate(loanForm.end_date)){
+      Alert.alert("End date must be greater than start date.");
       return;
     }
-
+    // Save loan
     const loanId = await insertLoan(loanForm);
     setResponseLoadId(loanId);
     // Save payment transactions for each month
-    const startDate = new Date(loanForm.start_date);
-    const endDate = new Date(loanForm.end_date);
-    const months = Math.ceil(
-      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30)
-    );
-
-    for (let i = 0; i < months; i++) {
-      const paymentDate = new Date(startDate);
-      paymentDate.setMonth(startDate.getMonth() + i);
+    const startDate = parseDate(loanForm.start_date)
+    const endDate = parseDate(loanForm.end_date)
+    const months =
+    (endDate.getFullYear() - startDate.getFullYear()) * 12 +
+    endDate.getMonth() -
+    startDate.getMonth();
+    
+    console.log(startDate,endDate,months);
+    if(months <= 0){
+      let paymentDate = new Date(endDate);
       const paymentForm: PaymentCreateDatabase = {
         gold_loan_id: loanId,
         transaction_id: "",
-        payment_date: paymentDate.toISOString().split("T")[0],
-        amount: loanForm.loan_amount / months,
+        payment_date: convertDateString(paymentDate.toISOString().split("T")[0]),
+        amount: Number(totalAmount.toFixed(3)),
         status: "pending",
       };
       await insertPayment(paymentForm);
+      console.log("payment form  ",paymentForm);
+    }
+    for (let i = 1; i <=months; i++) {
+      let paymentDate = new Date(startDate);
+      paymentDate.setMonth(startDate.getMonth() + i);
+      if(paymentDate > endDate){
+        paymentDate = new Date(endDate);
+      } 
+      const paymentForm: PaymentCreateDatabase = {
+        gold_loan_id: loanId,
+        transaction_id: "",
+        payment_date: convertDateString(paymentDate.toISOString().split("T")[0]),
+        amount: Number(monthlyPayment.toFixed(3)),
+        status: "pending",
+      };
+      await insertPayment(paymentForm);
+      console.log("payment form ",i," ",paymentForm);
     }
 
     Alert.alert("Loan saved successfully.");
@@ -199,6 +252,21 @@ export default function AddLoan() {
     index: number,
     goldItemForm: GoldItemCreateDatabase
   ) => {
+    if (!goldItemForm.item_description) {
+      Alert.alert("Please enter a name.");
+      return;
+    }else if (!goldItemForm.weight || goldItemForm.weight <= 0) {
+      Alert.alert("Weight must be greater than 0.");
+      return;
+    }else if (!goldItemForm.karat || goldItemForm.karat <= 0) {
+      Alert.alert("Karat must be greater than 0.");
+      return;
+    }
+    else if (!goldItemForm.appraisal_value || goldItemForm.appraisal_value <= 0) {
+      Alert.alert("Appraisal value must be greater than 0.");
+      return;
+    }
+
     if (
       !goldItemForm.item_description ||
       !goldItemForm.weight ||
@@ -220,16 +288,27 @@ export default function AddLoan() {
     }
   };
 
+  function parseDate(dateStr: string): Date {
+    const [day, month, year] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day); // month is 0-based in JavaScript Date
+  }
+
   const calculateMonthlyPayment = () => {
     const { loan_amount, interest_rate, end_date, start_date } = loanForm;
-    const startDate = new Date(start_date);
-    const endDate = new Date(end_date);
-    const months = Math.ceil(
-      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30)
-    );
+  
+  const startDate = parseDate(start_date);
+  const endDate = parseDate(end_date);
+
+
+  const months =
+  (endDate.getFullYear() - startDate.getFullYear()) * 12 +
+  endDate.getMonth() -
+  startDate.getMonth();
+
+    console.log("month one s ",startDate,endDate,months)
     const totalInterest = loan_amount * (interest_rate / 100) * (months / 12);
-    const totalAmount = loan_amount + totalInterest;
-    const monthlyPayment = totalAmount / months;
+    let totalAmount = loan_amount + totalInterest;
+    let monthlyPayment = totalAmount / months;
 
     return {
       totalAmount,
@@ -237,7 +316,8 @@ export default function AddLoan() {
     };
   };
 
-  const { totalAmount, monthlyPayment } = calculateMonthlyPayment();
+  let { totalAmount, monthlyPayment } = calculateMonthlyPayment();
+  if(monthlyPayment == Infinity) monthlyPayment=totalAmount;
 
   const handleDateChange = (
     date: Date,
@@ -261,6 +341,7 @@ export default function AddLoan() {
     const result = await ImagePicker.launchImageLibraryAsync({
       quality: 0.5,
       allowsEditing: true,
+      aspect:[1,1],
       base64: true,
       mediaTypes: ImagePicker.MediaTypeOptions.All,
     });
@@ -289,6 +370,7 @@ export default function AddLoan() {
       quality: 0.5,
       allowsEditing: true,
       base64: true,
+      aspect:[1,1],
       mediaTypes: ImagePicker.MediaTypeOptions.All,
     });
     if (!result.canceled && result.assets[0].base64) {
@@ -307,6 +389,15 @@ export default function AddLoan() {
       setGoldItems(updatedGoldItems);
     }
   };
+
+  function convertDateString(dateString:string) {
+    // Split the input date string by the hyphen
+    const [year, month, day] = dateString.split('-');
+    
+    // Return the formatted date string
+    return `${day}-${month}-${year}`;
+  }
+
 
   const router = useRouter();
 
@@ -330,7 +421,7 @@ export default function AddLoan() {
             • Customer Details
           </Text>
           <TextInput
-            className="mb-2 border border-yellow p-3 font-normal rounded-full"
+            className="mb-2 border border-yellow p-3 font-normal rounded-2xl"
             placeholder="Name"
             value={customerForm.name}
             autoComplete="name"
@@ -348,7 +439,7 @@ export default function AddLoan() {
             <View className="flex flex-row justify-start mb-3 items-center ">
               <Text className="text-lg font-medium mr-3  ">Date of Birth:</Text>
               <TextInput
-                className=" border border-yellow rounded-full w-[30%] p-3 text-black text-center"
+                className=" border border-yellow rounded-2xl w-[30%] p-3 text-black text-center"
                 value={customerForm.date_of_birth}
                 editable={false}
               />
@@ -370,7 +461,7 @@ export default function AddLoan() {
               onPress={() => setCustomerForm({ ...customerForm, gender: "M" })}
             >
               <Text
-                className={`p-3 border rounded-full ${
+                className={`p-3 border rounded-2xl ${
                   customerForm.gender === "M"
                     ? "border-yellow "
                     : "border-gray-300"
@@ -383,7 +474,7 @@ export default function AddLoan() {
               onPress={() => setCustomerForm({ ...customerForm, gender: "F" })}
             >
               <Text
-                className={`p-3 border rounded-full ml-2 ${
+                className={`p-3 border rounded-2xl ml-2 ${
                   customerForm.gender === "F"
                     ? "border-yellow"
                     : "border-gray-300"
@@ -396,7 +487,7 @@ export default function AddLoan() {
               onPress={() => setCustomerForm({ ...customerForm, gender: "O" })}
             >
               <Text
-                className={`p-3 border rounded-full ml-2 ${
+                className={`p-3 border rounded-2xl ml-2 ${
                   customerForm.gender === "O"
                     ? "border-yellow"
                     : "border-gray-300"
@@ -415,7 +506,7 @@ export default function AddLoan() {
               }
             >
               <Text
-                className={`p-3 border rounded-full ${
+                className={`p-3 border rounded-2xl ${
                   customerForm.marital_status === "married"
                     ? "border-yellow"
                     : "border-gray-300"
@@ -433,7 +524,7 @@ export default function AddLoan() {
               }
             >
               <Text
-                className={`p-3 border rounded-full ml-2 ${
+                className={`p-3 border rounded-2xl ml-2 ${
                   customerForm.marital_status === "unmarried"
                     ? "border-yellow"
                     : "border-gray-300"
@@ -445,7 +536,7 @@ export default function AddLoan() {
           </View>
 
           <TextInput
-            className="mb-2 border border-yellow p-3 font-normal  rounded-full"
+            className="mb-2 border border-yellow p-3 font-normal  rounded-2xl"
             placeholder="PAN Number"
             value={customerForm.pan_number}
             onChangeText={(text) =>
@@ -463,7 +554,7 @@ export default function AddLoan() {
             }
           />
           <TextInput
-            className="mb-2 border border-yellow p-3 font-normal rounded-full"
+            className="mb-2 border border-yellow p-3 font-normal rounded-2xl"
             placeholder="Pincode"
             inputMode="numeric"
             keyboardType="numeric"
@@ -473,7 +564,7 @@ export default function AddLoan() {
             }
           />
           <TextInput
-            className="mb-2 border border-yellow p-3 font-normal rounded-full"
+            className="mb-2 border border-yellow p-3 font-normal rounded-2xl"
             placeholder="Phone"
             inputMode="tel"
             keyboardType="number-pad"
@@ -483,7 +574,7 @@ export default function AddLoan() {
             }
           />
           <TextInput
-            className="mb-2 border border-yellow p-3 font-normal rounded-full"
+            className="mb-2 border border-yellow p-3 font-normal rounded-2xl"
             placeholder="Email"
             inputMode="email"
             keyboardType="email-address"
@@ -493,7 +584,7 @@ export default function AddLoan() {
             }
           />
           <TextInput
-            className="mb-2 border border-yellow p-3 font-normal rounded-full"
+            className="mb-2 border border-yellow p-3 font-normal rounded-2xl"
             placeholder="Account Number"
             inputMode="numeric"
             keyboardType="numeric"
@@ -503,7 +594,7 @@ export default function AddLoan() {
             }
           />
           <TextInput
-            className="mb-2 border border-yellow p-3 font-normal rounded-full"
+            className="mb-2 border border-yellow p-3 font-normal rounded-2xl"
             placeholder="IFSC"
             value={customerForm.ifsc}
             onChangeText={(text) =>
@@ -547,7 +638,7 @@ export default function AddLoan() {
         </View>
       ) : (
         <View>
-          <View className="flex flex-row items-center justify-between p-2 px-5 m-2 rounded-full border-2 border-yellow">
+          <View className="flex flex-row items-center justify-between p-2 px-5 m-2 rounded-2xl border-2 border-yellow">
             <TextInput
               className="w-[80%] text-lg bg-transparent text-black outline-none"
               placeholder="Search By Loan ID"
@@ -561,15 +652,25 @@ export default function AddLoan() {
               key={customer.customer_id}
               onPress={() => handleCustomerSelect(customer)}
             >
-              <Text className="mb-3 p-3 border border-yellow rounded-full">
+              <Text className="mb-3 p-3 border border-yellow rounded-2xl">
                 {customer.name}
               </Text>
             </TouchableOpacity>
           ))}
           {selectedCustomer && (
-            <View>
+            <View className="flex flex-col items-center justify-evenly">
+              <Image
+                source={{ uri: `data:image/png;base64,${selectedCustomer.photo}` }}
+                style={{
+                  width: 100,
+                  height: 100,
+                  marginTop: 10,
+                  borderRadius: 10,
+                  right: 0,
+                }}
+              />
               <Text className="text-xl font-bold mt-4">
-                Selected Customer: {selectedCustomer.name}
+             {selectedCustomer.name}
               </Text>
             </View>
           )}
@@ -580,7 +681,7 @@ export default function AddLoan() {
         <Text className="text text-lg font text mb-4">• Loan Details</Text>
         <View className="flex flex-row  justify-evenly">
           <TextInput
-            className="mb-3   border border-yellow   rounded-full p-1"
+            className="mb-3   border border-yellow   rounded-2xl p-1"
             inputMode="numeric"
             placeholder="Loan Amount"
             onChangeText={(text) =>
@@ -589,7 +690,7 @@ export default function AddLoan() {
             keyboardType="numeric"
           />
           <TextInput
-            className="mb-3  border border-yellow  rounded-full p-1"
+            className="mb-3  border border-yellow  rounded-2xl p-1"
             inputMode="numeric"
             placeholder="Interest Rate (%)"
             onChangeText={(text) =>
@@ -606,7 +707,7 @@ export default function AddLoan() {
         >
           <Text>Start Date:</Text>
           <TextInput
-            className="mb-3  border border-yellow w-32 text-black  rounded-full p-3"
+            className="mb-3  border border-yellow w-32 text-black  rounded-2xl p-3"
             placeholder="Start Date"
             value={loanForm.start_date}
             editable={false}
@@ -630,7 +731,7 @@ export default function AddLoan() {
         >
           <Text>End Date:</Text>
           <TextInput
-            className="mb-3 border border-yellow w-32 text-black  rounded-full p-3"
+            className="mb-3 border border-yellow w-32 text-black  rounded-2xl p-3"
             placeholder="End Date"
             value={loanForm.end_date}
             editable={false}
@@ -645,7 +746,7 @@ export default function AddLoan() {
         )}
         <View className="flex flex-row items-center justify-evenly gap-2 p-1">
           <TextInput
-            className="mb-3 border border-yellow rounded-full p-1"
+            className="mb-3 border border-yellow rounded-2xl p-1"
             placeholder="Overdue Interest Rate (%)"
             onChangeText={(text) =>
               setLoanForm({
@@ -656,7 +757,7 @@ export default function AddLoan() {
             keyboardType="numeric"
           />
           <TextInput
-            className="mb-3 border border-yellow rounded-full p-1"
+            className="mb-3 border border-yellow rounded-2xl p-1"
             placeholder="Number of Gold Items"
             onChangeText={(text) =>
               setLoanForm({
@@ -687,7 +788,7 @@ export default function AddLoan() {
               <View key={index} className="mb-14">
                 <Text className="mb-2">• Gold Item {index + 1}</Text>
                 <TextInput
-                  className="mb-2 border border-yellow rounded-full p-3"
+                  className="mb-2 border border-yellow rounded-2xl p-3"
                   placeholder="Name"
                 
                   // value={goldItems[index]?.item_description || ""}
@@ -700,8 +801,22 @@ export default function AddLoan() {
                     setGoldItems(updatedGoldItems);
                   }}
                 />
+                   <TextInput
+                  className="mb-2 border border-yellow rounded-2xl p-3"
+                  placeholder="Gold Category"
+                
+                  // value={goldItems[index]?.item_description || ""}
+                  onChangeText={(text) => {
+                    const updatedGoldItems = [...goldItems];
+                    updatedGoldItems[index] = {
+                      ...updatedGoldItems[index],
+                      item_type: text,
+                    };
+                    setGoldItems(updatedGoldItems);
+                  }}
+                />
                 <TextInput
-                  className="mb-2 border border-yellow rounded-full p-3 text-center"
+                  className="mb-2 border border-yellow rounded-2xl p-3 text-center"
                   placeholder="Weight (grams)"
                   inputMode="numeric"
                   // value={goldItems[index]?.weight?.toString() || ""}
@@ -716,7 +831,7 @@ export default function AddLoan() {
                   keyboardType="numeric"
                 />
                 <TextInput
-                  className="mb-2 border border-yellow rounded-full p-3 text-center"
+                  className="mb-2 border border-yellow rounded-2xl p-3 text-center"
                   placeholder="Karat"
                   inputMode="numeric"
                   keyboardType="numeric"
@@ -730,7 +845,7 @@ export default function AddLoan() {
                   }}
                 />
                 <TextInput
-                  className="mb-2 border border-yellow rounded-full p-3 text-center"
+                  className="mb-2 border border-yellow rounded-2xl p-3 text-center"
                   placeholder="Appraisal Value"
                   inputMode="numeric"
                   // value={goldItems[index]?.appraisal_value?.toString() || ""}
