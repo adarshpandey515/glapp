@@ -17,7 +17,7 @@ const LoanList = () => {
     const fetchLoans = async () => {
       try {
         const loansData = getAllLoansWithCustomer();
-        console.log(loansData);
+        console.log(" loan daya list of aya");
         setLoans(loansData);
         setFilteredLoans(loansData);
       } catch (error) {

@@ -47,7 +47,7 @@ export function ShowPayment() {
         Upcoming Payments
       </Text>
       <ScrollView className="w-full">
-        <View className="w-full h-11 border-b-2 flex flex-row items-center justify-evenly">
+        <View className="w-full h-8 border-b-2 flex flex-row items-center justify-evenly">
           <Text>Name</Text>
           <Text>Date</Text>
           <Text>Amount</Text>

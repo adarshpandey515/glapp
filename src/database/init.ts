@@ -1,6 +1,11 @@
 import { SQLiteDatabase } from "expo-sqlite/next";
+import { Platform } from "react-native";
 
 export async function init(database: SQLiteDatabase) {
+    if (Platform.OS == 'web') {
+        console.warn("WebSQL is not supported on web. Please use SQLite.");
+        return ;
+      }
   await database.execAsync(`
     PRAGMA journal_mode = 'wal';
 
