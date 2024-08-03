@@ -8,7 +8,7 @@ const sendTestEmail = async () => {
   };
 
   try {
-    const response = await fetch('http://localhost:3000/send-email-adarsh9876', {
+    const response = await fetch('https://glamail.netlify.app/send-email-adarsh9876', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
