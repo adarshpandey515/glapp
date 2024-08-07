@@ -15,6 +15,9 @@ const GoldCategoryGrid = () => {
     const fetchGoldItems = async () => {
       try {
         const itemsData = await getAllGoldItems();
+        if(itemsData.length==0) return (<Text className="flex p-1 text-xl flex-1 text-center m-10">No Gold Ornaments Stored</Text>);
+          
+        
         setGoldItems(itemsData);
       } catch (error) {
         console.error("Failed to fetch gold items:", error);

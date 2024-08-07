@@ -90,19 +90,20 @@ const LoanDetail = () => {
             margin: 5px 0;
            
 
-          
+            background-color:black;
             width: 80%; /* Allow the section to expand */
         }
 
         .section h2 {
-            color: rgb(167, 110, 5);
             padding: 2px;
             margin: 5px 20px;
+            color:yellow;
         }
 
         .section p {
             font-size: medium;
             padding: 1px;
+            color:white;
         }
 
         .customer-photo, .gold-item-photo {
@@ -193,11 +194,11 @@ const LoanDetail = () => {
                     <p>Weight: ${item.weight} grams</p>
                     <p>Karat: ${item.karat}</p>
                     <p>No of pieces: ${item.num_pieces}</p>
-                    <p>Appraisal value: ${item.appraisal_value}</p>
+                  
                 </div>
                 <div class="gold-item-photos">
-                    <img src="data:image/png;base64,${item.weighted_photo}" class="gold-item-photo-large" alt="Weighted Item Photo"/>
-                    <img src="data:image/png;base64,${item.normal_photo}" class="gold-item-photo-large" alt="Normal Item Photo"/>
+                    <img src="data:image/png;base64,${item.weighted_photo}" class="gold-item-photo-large" alt=" Photo 1"/>
+                    <img src="data:image/png;base64,${item.normal_photo}" class="gold-item-photo-large" alt=" Photo 2"/>
                 </div>
             `).join('')}
         </div>
@@ -209,6 +210,7 @@ const LoanDetail = () => {
         const file = await printToFileAsync({
       html: htmlContent,
       base64: false,
+      height:2000,
 
     });
 
@@ -291,18 +293,18 @@ const LoanDetail = () => {
       <View  >
       {goldItems.length > 0 ? (
         goldItems.map(item => (
-          <View key={item.loan_id} className="border-2 border-yellow p-2 mb-2 rounded-lg">
+          <View key={item.gold_item_id} className="border-2 border-yellow p-2 mb-2 rounded-lg">
             {/* <Text className="text-lg text-black">Item ID: {item.loan_id}</Text> */}
-            <Text className='text-xl '>{`Iteam no ${item.gold_item_id}`}</Text>
+            <Text className='text-xl '>{`Ornament no ${item.gold_item_id}`}</Text>
             <Text className="text-lg p-1 text-black">Type: {item.item_type}</Text>
             <Text className="text-lg p-1 text-black">Name: {item.item_description}</Text>
             <Text className="text-lg p-1 text-black">Weight: {item.weight} grams</Text>
             <Text className="text-lg p-1 text-black">Karat: {item.karat}</Text>
             <Text className="text-lg p-1 text-black">No of pieces: {item.num_pieces}</Text>
-            <Text className="text-lg p-1 text-black">Appraisal value : {item.appraisal_value}</Text>
+            {/* <Text className="text-lg p-1 text-black">Appraisal value : {item.appraisal_value}</Text> */}
             <View className='flex flex-row items-center justify-evenly pt-3'>
             <View >
-              <Text className="text-md text-black">Weighted Photo</Text>
+              <Text className="text-md text-black"> Photo 1</Text>
             <Image
             source={{ uri: `data:image/png;base64,${item.weighted_photo}` }}
             className="h-[100px]  w-[100px] rounded-xl mb-4"
@@ -310,7 +312,7 @@ const LoanDetail = () => {
           />
             </View>
             <View>
-              <Text className="text-md text-black">Normal Photo</Text>
+              <Text className="text-md text-black" >Photo 2</Text>
             <Image
             source={{ uri: `data:image/png;base64,${item.normal_photo}` }}
             className="h-[100px]  w-[100px] rounded-xl mb-4"

@@ -1,49 +1,4 @@
-// import "@/libs/dayjs";
-// import "@/styles/global.css";
 
-// import { Slot } from "expo-router";
-// import { StatusBar } from "expo-status-bar";
-// import * as SplashScreen from "expo-splash-screen";
-// import { GestureHandlerRootView } from "react-native-gesture-handler";
-
-// import { SQLiteProvider } from "expo-sqlite/next";
-// import * as database from "@/database/init";
-
-// import {
-//   useFonts,
-//   OpenSans_700Bold,
-//   OpenSans_400Regular,
-//   OpenSans_600SemiBold,
-// } from "@expo-google-fonts/open-sans";
-
-// import { colors } from "@/styles/colors";
-
-// SplashScreen.preventAutoHideAsync();
-
-// export default function Layout() {
-//   const [fontsLoaded] = useFonts({
-//     OpenSans_600SemiBold,
-//     OpenSans_400Regular,
-//     OpenSans_700Bold,
-//   });
-
-//   if (fontsLoaded) {
-//     SplashScreen.hideAsync();
-//   } else {
-//     return;
-//   }
-
-//   return (
-//     <GestureHandlerRootView
-//       style={{ flex: 1, backgroundColor: colors.gray[600] }}
-//     >
-//       <StatusBar style="light" />
-//       <SQLiteProvider databaseName="mygols.db" onInit={database.init}>
-//         <Slot />
-//       </SQLiteProvider>
-//     </GestureHandlerRootView>
-//   );
-// }
 import { SQLiteProvider } from "expo-sqlite/next";
 import * as database from "@/database/init";
 import "../styles/global.css";
@@ -92,24 +47,28 @@ function Footer() {
   }, [currentSegment]);
 
   const getMenuClass = (menu: string) => {
-    return activeMenu === menu ? "bg-black/70" : "bg-transparent";
+    return activeMenu === menu ? "bg-black" : "bg-transparent";
   };
 
   const getIconColor = (menu: string) => {
     return activeMenu === menu ? "orange" : "black";
   };
 
+
+  const getFillColor = (menu: string) => {
+    return activeMenu === menu ? "none" : "none";
+  }
   const getTextClass = (menu: string) => {
     return activeMenu === menu ? "text-yellow" : "text-[black]";
   };
 
-  const navigateTo = (path) => {
+  const navigateTo = (path:any) => {
     router.push(path);
   };
 
   return (
     <View
-      className="flex flex-row items-center bg-white rounded-full my-1 mx-2 justify-evenly"
+      className="flex flex-row items-center bg-white  mb-1 rounded-full mx-2 justify-evenly"
       style={{
         height: 60 + bottom,
         alignItems: "center",
@@ -130,7 +89,7 @@ function Footer() {
       >
         <View className={`px-5 py-1 rounded-full ${getMenuClass("Home")}`}>
           <View className="flex items-center justify-center rounded-full" style={{ width: 50, height: 40 }}>
-            <HomeIcon size={20} color={getIconColor("Home")} />
+            <HomeIcon size={20} color={getIconColor("Home")} fill={getFillColor("Home")}  />
             <Text className={`text-[10px] ${getTextClass("Home")}`}>Home</Text>
           </View>
         </View>
@@ -143,7 +102,7 @@ function Footer() {
       >
         <View className={`px-5 py-1 rounded-full ${getMenuClass("Loans")}`}>
           <View className="flex items-center justify-center rounded-full" style={{ width: 50, height: 40 }}>
-            <HandCoinsIcon size={20} color={getIconColor("Loans")} />
+            <HandCoinsIcon size={20} color={getIconColor("Loans")} fill={getFillColor("Loans")}  />
             <Text className={`text-[10px] ${getTextClass("Loans")}`}>Loans</Text>
           </View>
         </View>
@@ -156,7 +115,7 @@ function Footer() {
       >
         <View className={`px-5 py-1 rounded-full ${getMenuClass("Store")}`}>
           <View className="flex items-center justify-center rounded-full" style={{ width: 50, height: 40 }}>
-            <ShoppingBagIcon size={20} color={getIconColor("Store")} />
+            <ShoppingBagIcon size={20} color={getIconColor("Store")} fill={getFillColor("Store")} />
             <Text className={`text-[10px] ${getTextClass("Store")}`}>Store</Text>
           </View>
         </View>

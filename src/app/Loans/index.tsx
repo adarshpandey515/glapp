@@ -44,33 +44,37 @@ const LoanList = () => {
       setFilteredLoans(loans);
     }
   }, [search, loans, searchBy]);
+  const navigateToLoanDetail = (loan:any) => {
+    const params = new URLSearchParams({ loan: JSON.stringify(loan) });
+    const path:any = `/Loans/LoanDetail?${params.toString()}`;
+    router.push(path);
+  };
+
 
   return (
     <View className="flex-1 p-2 bg-white">
       <View className='flex flex-row items-center justify-between p-2 px-5 m-2 rounded-full border-2 border-yellow'>
         <TextInput
-          className="w-[70%] text-lg bg-transparent text-black outline-none"
+          className="w-[70%] text-sm bg-transparent text-black outline-none"
           placeholder={`Search By ${searchBy === 'loan_id' ? 'Loan ID' : 'Customer Name'}`}
           placeholderTextColor="#787878"
           value={search}
           onChangeText={setSearch}
         />
         <SearchIcon size={18} color="black" />
-        {/* <Picker
-          selectedValue={searchBy}
-          style={{ height: 50, width: 150 }}
-          onValueChange={(itemValue:any) => setSearchBy(itemValue)}
-        >
-          <Picker.Item label="Loan ID" value="loan_id" />
-          <Picker.Item label="Customer Name" value="customer_name" />
-        </Picker> */}
+     
       </View>
+      {loans.length === 0 && (  <View className="flex flex-row items-center justify-center">
+        <Text className="text-lg text-black">No loans found</Text>
+        
+        </View>
+        )}
       <ScrollView>
         {filteredLoans.map((loan, index) => (
           <TouchableOpacity
             key={index}
             className="border border-black/50 p-2 m-2 rounded-2xl"
-            onPress={() => router.push({ pathname: `/Loans/LoanDetail`, params: { loan: JSON.stringify(loan) } })}
+            onPress={() => navigateToLoanDetail(loan)}
           >
             <View className="flex-row justify-between">
               <View >

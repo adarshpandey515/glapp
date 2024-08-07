@@ -1,4 +1,3 @@
-
 import { useSQLiteContext } from "expo-sqlite/next";
 
 // Types
@@ -38,7 +37,7 @@ export type GoldItemCreateDatabase = {
   item_type?: string;
   weight: number;
   karat: number;
-  appraisal_value: number;
+  appraisal_value?: number;
   normal_photo?: string;
   weighted_photo?: string;
   num_pieces?: number;
@@ -112,7 +111,6 @@ export type LoanResponseDatabaseWithCustomer = {
   shop_id: number;
 };
 
-
 export type GoldItemResponseDatabase = {
   gold_item_id: number;
   loan_id: number;
@@ -128,9 +126,8 @@ export type GoldItemResponseDatabase = {
 
 export type PaymentWithCustomerResponseDatabase = PaymentResponseDatabase & {
   name: string;
+  email: string;
 };
-
-
 
 export type PaymentResponseDatabase = {
   payment_id: number;
@@ -141,12 +138,9 @@ export type PaymentResponseDatabase = {
   status: string;
 };
 
-
-
-
 export function useRepository() {
   const database = useSQLiteContext();
-  
+
   async function insertCustomer(customer: CustomerCreateDatabase) {
     try {
       const statement = database.prepareSync(
@@ -160,31 +154,30 @@ export function useRepository() {
           $account_number, $IFSC, $photo, $shop_id
         )`
       );
-  
+
       const result = statement.executeSync({
         $name: customer.name,
         $date_of_birth: customer.date_of_birth,
-        $gender: customer.gender || 'M',
-        $marital_status: customer.marital_status || '',
+        $gender: customer.gender || "M",
+        $marital_status: customer.marital_status || "",
         $pan_number: customer.pan_number,
-        $address: customer.address || '',
-        $pincode: customer.pincode || '',
-        $state: customer.state || '',
+        $address: customer.address || "",
+        $pincode: customer.pincode || "",
+        $state: customer.state || "",
         $phone: customer.phone,
         $email: customer.email,
-        $account_number: customer.account_number || '',
-        $IFSC: customer.ifsc || '',
+        $account_number: customer.account_number || "",
+        $IFSC: customer.ifsc || "",
         $photo: customer.photo || null, // Ensure photo is handled as null if undefined
         $shop_id: customer.shop_id,
       });
-  
+
       const customerId = result.lastInsertRowId;
       return customerId;
     } catch (error) {
       throw error;
     }
   }
-  
 
   async function insertLoan(loan: LoanCreateDatabase) {
     try {
@@ -202,12 +195,13 @@ export function useRepository() {
         $customer_id: loan.customer_id,
         $loan_amount: loan.loan_amount,
         $interest_rate: loan.interest_rate,
-        $start_date: loan.start_date || new Date().toISOString().split('T')[0],
+        $start_date: loan.start_date || new Date().toISOString().split("T")[0],
         $end_date: loan.end_date,
-        $status: loan.status || 'starting',
+        $status: loan.status || "starting",
         $num_of_gold_items: loan.num_of_gold_items || 1,
         $overdue_interest_rate: loan.overdue_interest_rate || 0,
-        $payment_date: loan.payment_date || new Date().toISOString().split('T')[0],
+        $payment_date:
+          loan.payment_date || new Date().toISOString().split("T")[0],
         $total_missed_payments: loan.total_missed_payments || 0,
       });
 
@@ -233,10 +227,10 @@ export function useRepository() {
       const result = statement.executeSync({
         $loan_id: goldItem.loan_id,
         $item_description: goldItem.item_description,
-        $item_type: goldItem.item_type || 'other',
+        $item_type: goldItem.item_type || "other",
         $weight: goldItem.weight,
         $karat: goldItem.karat,
-        $appraisal_value: goldItem.appraisal_value,
+        $appraisal_value: goldItem.appraisal_value || -1,
         $normal_photo: goldItem.normal_photo || null,
         $weighted_photo: goldItem.weighted_photo || null,
         $num_pieces: goldItem.num_pieces || 1,
@@ -264,7 +258,7 @@ export function useRepository() {
         $transaction_id: payment.transaction_id ?? "",
         $payment_date: payment.payment_date,
         $amount: payment.amount,
-        $status: payment.status || 'pending',
+        $status: payment.status || "pending",
       });
 
       const paymentId = result.lastInsertRowId;
@@ -311,7 +305,7 @@ export function useRepository() {
       throw error;
     }
   }
-  
+
   function getAllGoldItems() {
     try {
       return database.getAllSync<GoldItemResponseDatabase>(`
@@ -325,7 +319,7 @@ export function useRepository() {
   function getAllPaymentsDueSoon() {
     try {
       return database.getAllSync<PaymentWithCustomerResponseDatabase>(`
-        SELECT Payment.*, Customer.name 
+        SELECT Payment.*, Customer.name ,Customer.email
         FROM Payment
         INNER JOIN Loan ON Payment.gold_loan_id = Loan.loan_id
         INNER JOIN Customer ON Loan.customer_id = Customer.customer_id
@@ -340,7 +334,7 @@ export function useRepository() {
       throw error;
     }
   }
-  
+
   function updatePaymentStatus(paymentId: number, newStatus: string) {
     try {
       const statement = database.prepareSync(`
@@ -348,20 +342,21 @@ export function useRepository() {
         SET status = $newStatus
         WHERE payment_id = $paymentId
       `);
-  
+
       statement.executeSync({
         $newStatus: newStatus,
         $paymentId: paymentId,
       });
-  
+
       console.log(`Payment ID ${paymentId} status updated to ${newStatus}`);
     } catch (error) {
-      console.error(`Failed to update status for payment ID ${paymentId}:`, error);
+      console.error(
+        `Failed to update status for payment ID ${paymentId}:`,
+        error
+      );
       throw error;
     }
   }
-  
-  
 
   function getAllPaymentsByLoanId(loanId: number) {
     try {
@@ -385,21 +380,75 @@ export function useRepository() {
       const statement = database.prepareSync(`
         SELECT * FROM GoldItem WHERE loan_id = $gold_loan_id
       `);
-  
+
       // Execute the statement with the loanId parameter
       const result = statement.executeSync<GoldItemResponseDatabase>({
         $gold_loan_id: loanId,
       });
-  
+
       // Return the results
       return result.getAllSync();
     } catch (error) {
       throw error;
     }
-  }
-  
 
-  
+  }
+  function countTotalLoans() {
+    try {
+      const statement = database.prepareSync(`
+      SELECT COUNT(*) AS totalLoans FROM Loan
+    `);
+
+      const result = statement.executeSync();
+      // console.log("totalloans", result);
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  function countActiveLoans() {
+    try {
+      const statement = database.prepareSync(`
+      SELECT COUNT(*) AS activeLoans FROM Loan WHERE status = 'active'
+    `);
+
+      const result = statement.executeSync();
+      // console.log("activeLoans", result);
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  function countTotalCustomers() {
+    try {
+      const statement = database.prepareSync(`
+      SELECT COUNT(*) AS totalCustomers FROM Customer
+    `);
+
+      const result = statement.executeSync();
+      // console.log("totalCustomers", result);
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  function countPendingPayments() {
+    try {
+      const statement = database.prepareSync(`
+      SELECT COUNT(*) AS pendingPayments FROM Payment WHERE status != 'completed'
+    `);
+
+      const result = statement.executeSync();
+      // console.log("pendingPayments", result);
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
 
   return {
     insertCustomer,
@@ -414,6 +463,9 @@ export function useRepository() {
     getAllLoansWithCustomer,
     getAllGoldItemsByLoanId,
     updatePaymentStatus,
+    countTotalLoans,
+    countActiveLoans,
+    countTotalCustomers,
+    countPendingPayments,
   };
 }
-

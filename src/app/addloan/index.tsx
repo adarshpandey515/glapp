@@ -22,9 +22,14 @@ import {
 import DateTimePicker from "react-native-ui-datepicker";
 import dayjs from "dayjs";
 import { Badge } from "react-native-paper";
-import { SearchIcon } from "lucide-react-native";
+import { SaveAllIcon, SearchIcon } from "lucide-react-native";
 
 export default function AddLoan() {
+
+  const [CustomerView, setCustomerView] = useState(true);
+  const [LoanView, setLoanView] = useState(false);
+const [showGoldItemForm, setShowGoldItemForm] = useState(false);
+
   const {
     insertCustomer,
     getAllCustomers,
@@ -32,7 +37,7 @@ export default function AddLoan() {
     insertPayment,
     insertGoldItem,
   } = useRepository();
-
+  
   const [isNewCustomer, setIsNewCustomer] = useState(true);
   const [customers, setCustomers] = useState<CustomerResponseDatabase[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<
@@ -73,7 +78,6 @@ export default function AddLoan() {
   const [responseLoadId, setResponseLoadId] = useState(0);
 
   const [goldItems, setGoldItems] = useState<GoldItemCreateDatabase[]>([]);
-  const [showGoldItemForm, setShowGoldItemForm] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState({
     customerDOB: false,
     loanStartDate: false,
@@ -141,43 +145,67 @@ export default function AddLoan() {
   };
 
   const handleSaveCustomer = async () => {
-    if (!photoBase64) {
-      Alert.alert("Please upload a photo.");
+    if(!isNewCustomer){
+      if(!selectedCustomer){
+        Alert.alert("Please select a customer.");
+        return;
+      }
+      setLoanView(true);
+      setCustomerView(false);
       return;
-    }else if (!customerForm.date_of_birth || customerForm.date_of_birth === "Select Date" || customerForm.date_of_birth === "" || customerForm.date_of_birth === null || parseDate(customerForm.date_of_birth) > new Date()) {
-      Alert.alert("Date of Birth invalid.");
-      return;
-    }else if (!customerForm.name ) {
-      Alert.alert("Please enter a name.");
-      return;
-    }else if (!customerForm.pan_number ) {
-      Alert.alert("Please enter a PAN number.");
-      return;
-    }else if (!customerForm.phone || customerForm.phone.length >=15) {
-      Alert.alert("Please enter a Valid phone no.");
-      return;
-    }else if (!customerForm.email || !customerForm.email.includes("@") || !customerForm.email.includes(".") || customerForm.email.length < 5) {
-      Alert.alert("Please enter an Valid email.");
-      return;
+    }else{
+      
+      
+          if (!photoBase64) {
+            Alert.alert("Please upload a photo.");
+            return;
+          }else if (!customerForm.date_of_birth || customerForm.date_of_birth === "Select Date" || customerForm.date_of_birth === "" || customerForm.date_of_birth === null || parseDate(customerForm.date_of_birth) > new Date()) {
+            Alert.alert("Date of Birth is invalid.");
+            return;
+          }else if (!customerForm.name ) {
+            Alert.alert("Please enter a name.");
+            return;
+          }else if (!customerForm.pan_number || customerForm.pan_number.length < 10 || customerForm.pan_number.length > 10) {
+            Alert.alert("Pan number is invalid.");
+            return;
+          }else if (!customerForm.phone || customerForm.phone.length >10 || customerForm.phone.length < 10) {
+            Alert.alert("Please enter a Valid phone no.");
+            return;
+          }else if (!customerForm.email || !customerForm.email.includes("@") || !customerForm.email.includes(".") || customerForm.email.length < 5 || customerForm.email.length > 50) {
+            Alert.alert("Please enter an Valid email.");
+            return;
+          }else if (!customerForm.address || customerForm.address.length < 5 || customerForm.address.length > 1000) {
+            Alert.alert("Please enter an Valid address.");
+            return;
+          }else if (!customerForm.pincode || customerForm.pincode.length < 6 || customerForm.pincode.length > 6) {
+            Alert.alert("Please enter an Valid pincode.");
+            return;
+          }else if (!customerForm.state || customerForm.state.length < 12 || customerForm.state.length > 12 ){
+            Alert.alert("Please enter an Valid Addhar Number.");
+          }
+      
+      
+          if (
+            !customerForm.name ||
+            !customerForm.pan_number ||
+            !customerForm.phone ||
+            !customerForm.email
+          ) {
+            Alert.alert("Please fill out all required fields.");
+            return;
+          }
+      
+          const customerId = await insertCustomer({
+            ...customerForm,
+            photo: photoBase64,
+          });
+          setLoanForm({ ...loanForm, customer_id: customerId });
+          Alert.alert("Customer saved successfully.");
+          setLoanView(true);
+          setCustomerView(false);
     }
 
 
-    if (
-      !customerForm.name ||
-      !customerForm.pan_number ||
-      !customerForm.phone ||
-      !customerForm.email
-    ) {
-      Alert.alert("Please fill out all required fields.");
-      return;
-    }
-
-    const customerId = await insertCustomer({
-      ...customerForm,
-      photo: photoBase64,
-    });
-    setLoanForm({ ...loanForm, customer_id: customerId });
-    Alert.alert("Customer saved successfully.");
   };
 
   const handleSaveLoan = async () => {
@@ -243,7 +271,7 @@ export default function AddLoan() {
     }
 
     Alert.alert("Loan saved successfully.");
-
+    setLoanView(false);
     // Show form to save gold items
     setShowGoldItemForm(true);
   };
@@ -262,16 +290,13 @@ export default function AddLoan() {
       Alert.alert("Karat must be greater than 0.");
       return;
     }
-    else if (!goldItemForm.appraisal_value || goldItemForm.appraisal_value <= 0) {
-      Alert.alert("Appraisal value must be greater than 0.");
-      return;
-    }
+    
 
     if (
       !goldItemForm.item_description ||
       !goldItemForm.weight ||
-      !goldItemForm.karat ||
-      !goldItemForm.appraisal_value
+      !goldItemForm.karat 
+    
     ) {
       Alert.alert("Please fill out all required fields.");
       return;
@@ -284,8 +309,10 @@ export default function AddLoan() {
       setShowGoldItemForm(false);
       router.back();
     }else{
-      Alert.alert("Gold item saved successfully NO."+index.toLocaleString());
+      Alert.alert("Gold item saved successfully NO."+(index+1).toLocaleString());
     }
+    setCurrentGoldItemIndex((prevIndex) => prevIndex + 1);
+
   };
 
   function parseDate(dateStr: string): Date {
@@ -320,7 +347,7 @@ export default function AddLoan() {
   if(monthlyPayment == Infinity) monthlyPayment=totalAmount;
 
   const handleDateChange = (
-    date: Date,
+    date: any,
     type: "customerDOB" | "loanStartDate" | "loanEndDate"
   ) => {
     const formattedDate = dayjs(date).format("DD-MM-YYYY");
@@ -399,320 +426,427 @@ export default function AddLoan() {
   }
 
 
+  const [currentGoldItemIndex, setCurrentGoldItemIndex] = useState(0);
   const router = useRouter();
 
   return (
-    <ScrollView className="flex-1 p-4">
-      <Text className="text-xl font-medium text-center text-balance mb-4">
+    <ScrollView className="flex-1 pb-4 px-4">
+      <Text className="text-xl font-medium text-center text-balance mb-4 ">
         Add Loan
       </Text>
+      
+      
+      
+        {CustomerView && (
 
-      <View className="mb-4">
-        <Button
-          title={isNewCustomer ? "Existing Customer" : "New Customer"}
-          color="orange"
-          onPress={() => setIsNewCustomer(!isNewCustomer)}
-        />
-      </View>
+          <View>
+           <View className="flex-row">
+      <Text
+        className={`text-lg p-1 w-1/2 text-center rounded-t-3xl ${
+          isNewCustomer ? 'bg-black text-white' : 'bg-transparent text-black'
+        }`}
+        onPress={() => setIsNewCustomer(true)}
+      >
+        New Customer
+      </Text>
+      <Text
+        className={`text-lg p-1 w-1/2 text-center rounded-t-3xl ${
+          !isNewCustomer ? 'bg-black text-white' : 'bg-transparent text-black'
+        }`}
+        onPress={() => setIsNewCustomer(false)}
+      >
+        Existing Customer
+      </Text>
+    </View>
 
-      {isNewCustomer ? (
-        <View>
-          <Text className="text text-lg font text mb-4">
-            • Customer Details
-          </Text>
-          <TextInput
-            className="mb-2 border border-yellow p-3 font-normal rounded-2xl"
-            placeholder="Name"
-            value={customerForm.name}
-            autoComplete="name"
-            inputMode="text"
-            onChangeText={(text) =>
-              setCustomerForm({ ...customerForm, name: text })
-            }
-          />
-
-          <TouchableOpacity
-            onPress={() =>
-              setShowDatePicker({ ...showDatePicker, customerDOB: true })
-            }
-          >
-            <View className="flex flex-row justify-start mb-3 items-center ">
-              <Text className="text-lg font-medium mr-3  ">Date of Birth:</Text>
-              <TextInput
-                className=" border border-yellow rounded-2xl w-[30%] p-3 text-black text-center"
-                value={customerForm.date_of_birth}
-                editable={false}
-              />
-            </View>
-          </TouchableOpacity>
-          {showDatePicker.customerDOB && (
-            <DateTimePicker
-              mode="single"
-              date={new Date()}
-              onChange={(params) =>
-                handleDateChange(params.date, "customerDOB")
-              }
-            />
-          )}
-
-          <View className="flex-row mb-3 flex items-center justify-start">
-            <Text className="text-lg font-medium mr-3">Gender:</Text>
-            <TouchableOpacity
-              onPress={() => setCustomerForm({ ...customerForm, gender: "M" })}
-            >
-              <Text
-                className={`p-3 border rounded-2xl ${
-                  customerForm.gender === "M"
-                    ? "border-yellow "
-                    : "border-gray-300"
-                }`}
-              >
-                Male
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setCustomerForm({ ...customerForm, gender: "F" })}
-            >
-              <Text
-                className={`p-3 border rounded-2xl ml-2 ${
-                  customerForm.gender === "F"
-                    ? "border-yellow"
-                    : "border-gray-300"
-                }`}
-              >
-                Female
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setCustomerForm({ ...customerForm, gender: "O" })}
-            >
-              <Text
-                className={`p-3 border rounded-2xl ml-2 ${
-                  customerForm.gender === "O"
-                    ? "border-yellow"
-                    : "border-gray-300"
-                }`}
-              >
-                Other
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View className="flex-row mb-3 items-center">
-            <Text className="text-lg font-medium mr-3">Marital Status:</Text>
-            <TouchableOpacity
-              onPress={() =>
-                setCustomerForm({ ...customerForm, marital_status: "married" })
-              }
-            >
-              <Text
-                className={`p-3 border rounded-2xl ${
-                  customerForm.marital_status === "married"
-                    ? "border-yellow"
-                    : "border-gray-300"
-                }`}
-              >
-                Married
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() =>
-                setCustomerForm({
-                  ...customerForm,
-                  marital_status: "unmarried",
-                })
-              }
-            >
-              <Text
-                className={`p-3 border rounded-2xl ml-2 ${
-                  customerForm.marital_status === "unmarried"
-                    ? "border-yellow"
-                    : "border-gray-300"
-                }`}
-              >
-                Unmarried
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <TextInput
-            className="mb-2 border border-yellow p-3 font-normal  rounded-2xl"
-            placeholder="PAN Number"
-            value={customerForm.pan_number}
-            onChangeText={(text) =>
-              setCustomerForm({ ...customerForm, pan_number: text })
-            }
-          />
-          <TextInput
-            className="mb-2 border border-yellow p-3 text-justify font-normal rounded-xl"
-            placeholder="Address"
-            multiline
-            numberOfLines={4}
-            value={customerForm.address}
-            onChangeText={(text) =>
-              setCustomerForm({ ...customerForm, address: text })
-            }
-          />
-          <TextInput
-            className="mb-2 border border-yellow p-3 font-normal rounded-2xl"
-            placeholder="Pincode"
-            inputMode="numeric"
-            keyboardType="numeric"
-            value={customerForm.pincode}
-            onChangeText={(text) =>
-              setCustomerForm({ ...customerForm, pincode: text })
-            }
-          />
-          <TextInput
-            className="mb-2 border border-yellow p-3 font-normal rounded-2xl"
-            placeholder="Phone"
-            inputMode="tel"
-            keyboardType="number-pad"
-            value={customerForm.phone}
-            onChangeText={(text) =>
-              setCustomerForm({ ...customerForm, phone: text })
-            }
-          />
-          <TextInput
-            className="mb-2 border border-yellow p-3 font-normal rounded-2xl"
-            placeholder="Email"
-            inputMode="email"
-            keyboardType="email-address"
-            value={customerForm.email}
-            onChangeText={(text) =>
-              setCustomerForm({ ...customerForm, email: text })
-            }
-          />
-          <TextInput
-            className="mb-2 border border-yellow p-3 font-normal rounded-2xl"
-            placeholder="Account Number"
-            inputMode="numeric"
-            keyboardType="numeric"
-            value={customerForm.account_number}
-            onChangeText={(text) =>
-              setCustomerForm({ ...customerForm, account_number: text })
-            }
-          />
-          <TextInput
-            className="mb-2 border border-yellow p-3 font-normal rounded-2xl"
-            placeholder="IFSC"
-            value={customerForm.ifsc}
-            onChangeText={(text) =>
-              setCustomerForm({ ...customerForm, ifsc: text })
-            }
-          />
-          <View className=" flex flex-row items-center justify-evenly p-2 m-2 mb-2 ">
-            <View className="flex felx-col iteam-center justify-evenly p-1 m-1 gap-1">
-              <Button
-                title="Upload Photo"
-                color="orange"
-                onPress={handlePhotoPick}
-              />
-              <Text className="text-center">OR</Text>
-              <Button
-                title="Click Photo"
-                color="orange"
-                onPress={handleClickPhoto}
-              />
-            </View>
-            {photoBase64 ? (
-              <Image
-                source={{ uri: `data:image/png;base64,${photoBase64}` }}
-                style={{
-                  width: 100,
-                  height: 100,
-                  marginTop: 10,
-                  borderRadius: 10,
-                  right: 0,
-                }}
-              />
-            ) : null}
-          </View>
-          <View className="my-2 pb-2 w-full   ">
-            <Button
-              title="Save Customer"
-              color="orange"
-              onPress={handleSaveCustomer}
-            />
-          </View>
-        </View>
-      ) : (
-        <View>
-          <View className="flex flex-row items-center justify-between p-2 px-5 m-2 rounded-2xl border-2 border-yellow">
+    <View className={`bg-black mb-5 rounded-b-3xl ${isNewCustomer ? 'rounded-r-3xl' : 'rounded-l-3xl'}`}>
+    {isNewCustomer ? (
+          <View className="p-1 px-5 text-white">
+            <Text className="text text-lg text-yellow  p-3">
+              --{">"} Customer Details
+            </Text>
+            <Text className="text-black p-1 bg-yellow  w-1/4 text-center rounded-t-xl  ">Name</Text>
             <TextInput
-              className="w-[80%] text-lg bg-transparent text-black outline-none"
-              placeholder="Search By Loan ID"
-              placeholderTextColor="#787878"
-              onChangeText={handleSearch}
+              className="mb-2  text-black bg-white px-3 p-1  rounded-b-xl rounded-r-xl"
+          
+              placeholder="Adarsh Pandey "
+              value={customerForm.name}
+              autoComplete="name"
+              inputMode="text"
+              onChangeText={(text) =>
+                setCustomerForm({ ...customerForm, name: text })
+              }
             />
-            <SearchIcon size={18} color="black" />
-          </View>
-          {filteredCustomers.map((customer) => (
+  
             <TouchableOpacity
-              key={customer.customer_id}
-              onPress={() => handleCustomerSelect(customer)}
+              onPress={() =>
+                setShowDatePicker({ ...showDatePicker, customerDOB: true })
+              }
             >
-              <Text className="mb-3 p-3 border border-yellow rounded-2xl">
-                {customer.name}
-              </Text>
+              <View className="flex flex-row justify-start  my-3 items-center ">
+                <Text className="  text-black bg-yellow rounded-l-xl border border-yellow px-2 py-2">Date of Birth:</Text>
+                <TextInput
+                  className="  bg-white rounded-r-xl w-[30%] px-2 py-1 text-black text-center"
+                  value={customerForm.date_of_birth}
+                  editable={false}
+                />
+              </View>
             </TouchableOpacity>
-          ))}
-          {selectedCustomer && (
-            <View className="flex flex-col items-center justify-evenly">
-              <Image
-                source={{ uri: `data:image/png;base64,${selectedCustomer.photo}` }}
-                style={{
-                  width: 100,
-                  height: 100,
-                  marginTop: 10,
-                  borderRadius: 10,
-                  right: 0,
-                }}
-              />
-              <Text className="text-xl font-bold mt-4">
-             {selectedCustomer.name}
-              </Text>
-            </View>
-          )}
-        </View>
-      )}
+            {showDatePicker.customerDOB && (
+              <View className="bg-white rounded-3xl">
 
-      <View className="mt-4">
-        <Text className="text text-lg font text mb-4">• Loan Details</Text>
-        <View className="flex flex-row  justify-evenly">
-          <TextInput
-            className="mb-3   border border-yellow   rounded-2xl p-1"
+                <DateTimePicker
+                  mode="single"
+                
+                  date={new Date()}
+                  onChange={(params) =>
+                  handleDateChange(params.date, "customerDOB")
+                  }
+                />
+              </View>
+            )}
+  
+            <View className="flex-row my-3 bg-white  flex items-center  rounded-xl">
+              <Text className=" rounded-l-xl text-start bg-yellow border border-yellow text-black p-3  mr-5">Gender</Text>
+              <View className="flex flex-row justify-between p-1">
+              <TouchableOpacity
+                onPress={() => setCustomerForm({ ...customerForm, gender: "M" })}
+              >
+                <Text
+                  className={`p-1 border rounded-xl mr-5 ${
+                    customerForm.gender === "M"
+                      ? "bg-yellow  "
+                      : "border-gray-300"
+                  }`}
+                >
+                  Male
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setCustomerForm({ ...customerForm, gender: "F" })}
+              >
+                <Text
+                  className={`p-1 border rounded-xl mr-4 ${
+                    customerForm.gender === "F"
+                      ? "bg-yellow"
+                      : "border-gray-300"
+                  }`}
+                >
+                  Female
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setCustomerForm({ ...customerForm, gender: "O" })}
+              >
+                <Text
+                  className={`p-1 border rounded-xl  ${
+                    customerForm.gender === "O"
+                      ? "bg-yellow"
+                      : "border-gray-300"
+                  }`}
+                >
+                  Other
+                </Text>
+              </TouchableOpacity>
+              </View>
+
+            </View>
+  
+            <View className="flex-row my-3 bg-white items-center  justify-between pr-5 rounded-xl">
+              <Text className=" px-3 mr-3 bg-yellow   p-2 border border-yellow rounded-l-xl">Marital Status</Text>
+              <View className="flex flex-row  justify-start">
+              <TouchableOpacity
+                onPress={() =>
+                  setCustomerForm({ ...customerForm, marital_status: "married" })
+                }
+              >
+                <Text
+                  className={`p-1 mr-4 border rounded-xl ${
+                    customerForm.marital_status === "married"
+                      ? "bg-yellow"
+                      : "border-gray-300"
+                  }`}
+                >
+                  Married
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() =>
+                  setCustomerForm({
+                    ...customerForm,
+                    marital_status: "unmarried",
+                  })
+                }
+              >
+                <Text
+                  className={`p-1 border rounded-xl ml-2 ${
+                    customerForm.marital_status === "unmarried"
+                      ? "bg-yellow"
+                      : "border-gray-300"
+                  }`}
+                >
+                  Unmarried
+                </Text>
+              </TouchableOpacity>
+              </View>
+            </View>
+            <Text className="text-black p-1 mt-3 bg-yellow  w-1/3 text-center rounded-t-xl  ">Pan Number</Text>
+            <TextInput
+              className="mb-3  bg-white border-yellow p-1 font-normal  rounded-r-xl rounded-b-xl"
+              placeholder="MGXTY12345"
+               value={customerForm.pan_number}
+              onChangeText={(text) =>
+                setCustomerForm({ ...customerForm, pan_number: text })
+              }
+            />
+            <Text className="text-black p-1 mt-3 bg-yellow  w-1/3 text-center rounded-t-xl  ">Address</Text>
+            <TextInput
+              className="mb-3  bg-white border-yellow p-1 item-start rounded-b-xl rounded-r-xl"
+              placeholder="Address"
+              multiline
+              numberOfLines={3}
+              value={customerForm.address}
+              onChangeText={(text) =>
+                setCustomerForm({ ...customerForm, address: text })
+              }
+            />
+            <View className="flex flex-row items-center justify-between">
+              <View  className="w-1/3">
+            <Text className="text-black p-1 mt-3 bg-yellow   text-center rounded-t-xl  ">Pincode</Text>
+            <TextInput
+              className="mb-2  bg-white p-1 font-normal rounded-b-xl "
+              placeholder="400004"
+              inputMode="numeric"
+              keyboardType="numeric"
+              value={customerForm.pincode}
+              onChangeText={(text) =>
+                setCustomerForm({ ...customerForm, pincode: text })
+              }
+            />
+            </View>
+            <View className="w-[50%]">
+            <Text className="text-black p-1 mt-3 bg-yellow   text-center rounded-t-xl  ">Phone</Text>
+            <TextInput
+              className="mb-2   p-1 font-normal rounded-b-xl bg-white "
+              placeholder="9004353415"
+              inputMode="tel"
+              keyboardType="number-pad"
+              value={customerForm.phone}
+              onChangeText={(text) =>
+                setCustomerForm({ ...customerForm, phone: text })
+              }
+            />
+            </View>
+            </View>
+            <Text className="text-black w-1/3 p-1 mt-3 bg-yellow   text-center rounded-t-xl  ">Email</Text>
+
+            <TextInput
+              className="mb-2  bg-white p-1 font-normal rounded-b-xl rounded-r-xl"
+              placeholder="addcd@gmail.com"
+              inputMode="email"
+              keyboardType="email-address"
+              value={customerForm.email}
+              onChangeText={(text) =>
+                setCustomerForm({ ...customerForm, email: text })
+              }
+            />
+             <Text className="text-black p-1 mt-3 bg-yellow  w-[43%] text-center rounded-t-xl  ">Accound Number</Text>
+
+            <TextInput
+              className="mb-2  bg-white p-1 font-normal rounded-b-xl  rounded-r-xl"
+              placeholder="43343535353"
+              inputMode="numeric"
+              keyboardType="numeric"
+              value={customerForm.account_number}
+              onChangeText={(text) =>
+                setCustomerForm({ ...customerForm, account_number: text })
+              }
+            />
+             <Text className="text-black p-1 mt-3 bg-yellow  w-[43%] text-center rounded-t-xl  ">IFSC CODE</Text>
+             <TextInput
+              className="mb-2  bg-white p-1  rounded-b-xl rounded-r-xl"
+              placeholder="SBIN0043"
+              value={customerForm.ifsc}
+              onChangeText={(text) =>
+                setCustomerForm({ ...customerForm, ifsc: text })
+              }
+            />
+             <Text className="text-black p-1 mt-3 bg-yellow  w-[43%] text-center rounded-t-xl  ">Addhar Number</Text>
+             <TextInput
+             keyboardType="numeric"
             inputMode="numeric"
-            placeholder="Loan Amount"
+              className="mb-2  bg-white p-1  rounded-b-xl rounded-r-xl"
+              placeholder="455443217574"
+              value={customerForm.state}
+              onChangeText={(text) =>
+                setCustomerForm({ ...customerForm, state: text })
+              }
+            />
+              <Text className="text-yellow text-lg p-3">--{">"} Customer Photo</Text>
+            <View className=" flex flex-row items-center justify-evenly p-2 m-2 mb-2 ">
+              <View className="flex felx-row iteam-center justify-evenly p-1 m-1 gap-1">
+                <Button
+                  title="Upload "
+                  color="orange"
+                  
+                  
+                  onPress={handlePhotoPick}
+                />
+                <Text className="text-center text-white">OR</Text>
+                <Button
+                  title="Click "
+                  color="orange"
+                  onPress={handleClickPhoto}
+                />
+              </View>
+              {photoBase64 ? (
+                <Image
+                  source={{ uri: `data:image/png;base64,${photoBase64}` }}
+                  style={{
+                    width: 100,
+                    height: 100,
+                    marginTop: 10,
+                    borderRadius: 10,
+                    right: 0,
+                  }}
+                />
+              ) : null}
+            </View>
+            <View className="my-2 pb-2 w-full  flex items-center ">
+              <TouchableOpacity
+              className="bg-yellow p-2 w-1/2 flex flex-row justify-evenly rounded-xl"
+                onPress={handleSaveCustomer}
+              
+              ><SaveAllIcon color="black"  size={20}></SaveAllIcon>
+              <Text className="text-center"> Save Customer</Text></TouchableOpacity>
+            </View>
+          </View>
+        ) : (
+          <View className="bg-black p-1 px-4" style={{height:460}}>
+            <Text className="text-yellow">Search Customer</Text>
+            <View className="flex   flex-row items-center mb-5 justify-between p-2 px-5 m-2 rounded-xl border-2 border-yellow">
+              <TextInput
+                className="w-[80%] text-lg bg-transparent text-white outline-none"
+                placeholder="Search By Loan ID"
+                placeholderTextColor="#787878"
+                onChangeText={handleSearch}
+              />
+              <SearchIcon size={18} color="white" />
+            </View>
+            {filteredCustomers.map((customer) => (
+              <TouchableOpacity
+                key={customer.customer_id}
+                onPress={() => handleCustomerSelect(customer)}
+                className="mx-2 rounded-lg p-1 flex-row justify-between items-center border-yellow border-2 "
+              >
+                <Text className="mb-2 p-1 border  text-white rounded-xl  ">
+                  {customer.name}
+                </Text>
+                <Image
+                  source={{ uri: `data:image/png;base64,${customer.photo}` }}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 3,
+                  }}
+                />
+              </TouchableOpacity>
+            ))}
+            {selectedCustomer && (
+              <View className="flex flex-col items-center justify-evenly">
+                <Image
+                  source={{ uri: `data:image/png;base64,${selectedCustomer.photo}` }}
+                  style={{
+                    width: 100,
+                    height: 100,
+                    marginTop: 10,
+                    borderRadius: 10,
+                    right: 0,
+                  }}
+                />
+                <Text className="text-xl  text-white font-bold mt-4">
+               {selectedCustomer.name}
+                </Text>
+                <View>
+                  <Text>DOB: {selectedCustomer.date_of_birth}</Text>
+                </View>
+                <View className="my-2 pb-2 w-full  flex items-center ">
+            </View>
+            <TouchableOpacity
+            className="bg-yellow p-2 w-1/2 flex flex-row justify-evenly rounded-xl"
+              onPress={handleSaveCustomer}
+            
+            >
+            <Text className="text-center"> Next </Text></TouchableOpacity>
+            </View>
+  
+            )}
+          </View>
+        )}
+        </View>
+          </View>
+       
+        )
+        }
+
+        {LoanView && (
+
+      <View className="mt-4 items-center px-5 z-0 rounded-3xl"> 
+    
+   <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center',justifyContent:"space-between" }}>
+      <Text className="z-50 bg-black h-full  flex-grow rounded-t-3xl"></Text>
+      <Text className="p-1 rounded-b-3xl text-lg font-bold text-black bg-white text-center ">
+        Loan Details
+      </Text>
+      <Text className="z-100 bg-black h-full  rounded-t-3xl text-end flex-grow"></Text>
+    </View>
+        <View className="bg-black rounded-b-3xl flex-grow w-full p-1 pt-4">
+
+        
+        <View className="flex flex-row   justify-evenly">
+          <View className="w-auto ">
+
+        <Text className="text-white p-1 rounded-t-xl bg-yellow">Loan Amount</Text>
+          <TextInput
+            className="mb-3 w-full  border  border-white bg-white flex-grow rounded-b-xl p-1"
+            inputMode="numeric"
+            placeholder="10000"
+            
             onChangeText={(text) =>
               setLoanForm({ ...loanForm, loan_amount: parseFloat(text) || 0 })
             }
             keyboardType="numeric"
           />
+          </View>
+          <View>
+          <Text className="text-white p-1 rounded-t-xl bg-yellow">Interest Rate(%)</Text>
           <TextInput
-            className="mb-3  border border-yellow  rounded-2xl p-1"
+            className="mb-3   border border-white bg-white rounded-b-xl p-1"
             inputMode="numeric"
-            placeholder="Interest Rate (%)"
+            placeholder="0"
             onChangeText={(text) =>
               setLoanForm({ ...loanForm, interest_rate: parseFloat(text) || 0 })
             }
             keyboardType="numeric"
           />
+            </View>
         </View>
         <TouchableOpacity
-          className="flex items-center flex-row text-black justify-evenly"
+          className="flex items-center flex-row text-white  justify-evenly"
           onPress={() =>
             setShowDatePicker({ ...showDatePicker, loanStartDate: true })
           }
         >
-          <Text>Start Date:</Text>
+          <Text className="text-black p-2 text-end rounded-xl bg-yellow">Start Date</Text>
           <TextInput
-            className="mb-3  border border-yellow w-32 text-black  rounded-2xl p-3"
+            className="mb-3  border border-yellow w-32 text-black bg-white rounded-xl p-2"
             placeholder="Start Date"
             value={loanForm.start_date}
             editable={false}
           />
         </TouchableOpacity>
+        <View className="bg-white rounded-xl">
+          
         {showDatePicker.loanStartDate && (
           <DateTimePicker
             mode="single"
@@ -722,21 +856,23 @@ export default function AddLoan() {
             }
           />
         )}
+        </View>
 
         <TouchableOpacity
-          className="flex flex-row justify-evenly text-black items-center"
+          className="flex flex-row justify-evenly text-white items-center"
           onPress={() =>
             setShowDatePicker({ ...showDatePicker, loanEndDate: true })
           }
         >
-          <Text>End Date:</Text>
+          <Text className="bg-yellow rounded-xl p-2">End Date</Text>
           <TextInput
-            className="mb-3 border border-yellow w-32 text-black  rounded-2xl p-3"
+            className="mb-3 border bg-white w-32 text-black  rounded-xl p-2"
             placeholder="End Date"
             value={loanForm.end_date}
             editable={false}
           />
         </TouchableOpacity>
+        <View className="bg-white rounded-xl">
         {showDatePicker.loanEndDate && (
           <DateTimePicker
             mode="single"
@@ -744,10 +880,14 @@ export default function AddLoan() {
             onChange={(params) => handleDateChange(params.date, "loanEndDate")}
           />
         )}
-        <View className="flex flex-row items-center justify-evenly gap-2 p-1">
+</View>
+        <View className="flex flex-row items-start justify-evenly gap-2 p-1">
+          <View>
+
+          <Text className="text-white p-1 rounded-t-xl bg-yellow">Overdue Interest</Text>
           <TextInput
-            className="mb-3 border border-yellow rounded-2xl p-1"
-            placeholder="Overdue Interest Rate (%)"
+            className="mb-3 border border-white bg-white  rounded-b-xl p-1"
+            placeholder="0     "
             onChangeText={(text) =>
               setLoanForm({
                 ...loanForm,
@@ -756,9 +896,13 @@ export default function AddLoan() {
             }
             keyboardType="numeric"
           />
+          </View>
+          <View>
+
+          <Text className="text-white p-1 rounded-t-xl bg-yellow">No. of Gold Items</Text>
           <TextInput
-            className="mb-3 border border-yellow rounded-2xl p-1"
-            placeholder="Number of Gold Items"
+            className="mb-3 border border-white bg-white  rounded-b-xl p-1"
+            placeholder="0"
             onChangeText={(text) =>
               setLoanForm({
                 ...loanForm,
@@ -767,166 +911,186 @@ export default function AddLoan() {
             }
             keyboardType="numeric"
           />
+            </View>
         </View>
-        <Text className="text-lg font-medium mt-3">• Loan Calculation</Text>
-        <Text className="mb-3 text-xl font-medium text-center mt-3">
+        {/* <Text className="text-lg font-normal text-yellow mt-3">--{">"} Loan Calculation</Text> */}
+        <Text className="mb-3 text-xl font-light text-center text-yellow mt-3">
           Monthly Payment: {monthlyPayment.toFixed(2)}
         </Text>
-        <Text className="mb-3 text-xl font-medium text-center">
+        <Text className="mb-3 text-xl font-light text-yellow text-center">
           Total Amount: {totalAmount.toFixed(2)}
         </Text>
-        <View className="mb-4 pb-2 ">
-          <Button title="Save Loan" color="orange" onPress={handleSaveLoan} />
+        <View className=" rounded-b-xl items-center ">
+          <Text  className="text-black border-yellow borderr-2  text-center w-1/3 bg-white p-3 items-center rounded-xl" onPress={handleSaveLoan} >Save Loan</Text>
         </View>
       </View>
+      </View>
+        )}
 
-      {showGoldItemForm && (
-        <View>
-          <Text className="text text-lg font text mb-4">• Gold Items</Text>
-          {Array.from({ length: loanForm.num_of_gold_items ?? 0 }).map(
-            (_, index) => (
-              <View key={index} className="mb-14">
-                <Text className="mb-2">• Gold Item {index + 1}</Text>
-                <TextInput
-                  className="mb-2 border border-yellow rounded-2xl p-3"
-                  placeholder="Name"
-                
-                  // value={goldItems[index]?.item_description || ""}
-                  onChangeText={(text) => {
+    
+
+{showGoldItemForm && (
+  <View >
+    <Text className="text text-lg font text mb-4">• Gold Ornaments</Text>
+    {Array.from({ length: loanForm.num_of_gold_items ?? 0 }).map(
+      (_, index) => (
+        currentGoldItemIndex === index && (
+          <View key={index} className="mb-14 px-4 p-1 bg-black mx-3 rounded-3xl">
+            <Text className="mb-3   text-lg text-black bg-white rounded-xl px-2 p-1  absolute left-0 ">{index + 1}</Text>
+
+
+            <Text className="text-white p-1  mt-10 rounded-t-xl w-1/2 bg-yellow">Name / Model No.</Text>
+            <TextInput
+              className="mb-2 border border-white bg-white rounded-r-xl rounded-b-xl p-2"
+              placeholder="Name"
+              value={goldItems[index]?.item_description || ""}
+              onChangeText={(text) => {
+                const updatedGoldItems = [...goldItems];
+                updatedGoldItems[index] = {
+                  ...updatedGoldItems[index],
+                  item_description: text,
+                };
+                setGoldItems(updatedGoldItems);
+              }}
+            />
+           <Text className="mt-5 mb-1 p-1 text-yellow">Select Category</Text>
+            <View className="flex-row text-black flex-wrap mb-2">
+              {['Necklace', 'Earrings', 'Bracelet', 'Ring', 'Bangle', 'Pendant','Brooch','Other '].map((category) => (
+                <TouchableOpacity
+                  key={category}
+                  className={`border border-yellow text-black rounded-xl p-2 m-1 ${
+                    goldItems[index]?.item_type === category ? 'bg-yellow' : 'bg-white'
+                  }`}
+                  onPress={() => {
                     const updatedGoldItems = [...goldItems];
                     updatedGoldItems[index] = {
                       ...updatedGoldItems[index],
-                      item_description: text,
+                      item_type: category,
                     };
                     setGoldItems(updatedGoldItems);
                   }}
-                />
-                   <TextInput
-                  className="mb-2 border border-yellow rounded-2xl p-3"
-                  placeholder="Gold Category"
-                
-                  // value={goldItems[index]?.item_description || ""}
-                  onChangeText={(text) => {
-                    const updatedGoldItems = [...goldItems];
-                    updatedGoldItems[index] = {
-                      ...updatedGoldItems[index],
-                      item_type: text,
-                    };
-                    setGoldItems(updatedGoldItems);
-                  }}
-                />
-                <TextInput
-                  className="mb-2 border border-yellow rounded-2xl p-3 text-center"
-                  placeholder="Weight (grams)"
-                  inputMode="numeric"
-                  // value={goldItems[index]?.weight?.toString() || ""}
-                  onChangeText={(text) => {
-                    const updatedGoldItems = [...goldItems];
-                    updatedGoldItems[index] = {
-                      ...updatedGoldItems[index],
-                      weight: parseFloat(text) || 0,
-                    };
-                    setGoldItems(updatedGoldItems);
-                  }}
-                  keyboardType="numeric"
-                />
-                <TextInput
-                  className="mb-2 border border-yellow rounded-2xl p-3 text-center"
-                  placeholder="Karat"
-                  inputMode="numeric"
-                  keyboardType="numeric"
-                  onChangeText={(text) => {
-                    const updatedGoldItems = [...goldItems];
-                    updatedGoldItems[index] = {
-                      ...updatedGoldItems[index],
-                      karat: Number(text) || 0,
-                    };
-                    setGoldItems(updatedGoldItems);
-                  }}
-                />
-                <TextInput
-                  className="mb-2 border border-yellow rounded-2xl p-3 text-center"
-                  placeholder="Appraisal Value"
-                  inputMode="numeric"
-                  // value={goldItems[index]?.appraisal_value?.toString() || ""}
-                  onChangeText={(text) => {
-                    const updatedGoldItems = [...goldItems];
-                    updatedGoldItems[index] = {
-                      ...updatedGoldItems[index],
-                      appraisal_value: parseFloat(text) || 0,
-                    };
-                    setGoldItems(updatedGoldItems);
-                  }}
-                  keyboardType="numeric"
-                />
-                <Text className="text-normal">• Gold Item Photo</Text>
-                <View className="flex-row items-center justify-evenly p-3 mb-5">
-                <View className="flex-col w-40 justify-between mb-2 gap-1">
-                  <Button
-                    title="photo select "
-                    color="orange"
-                    onPress={() => handleGoldItemPhotoPick(index, "normal")}
-                  />
-                  <Text className="text-center">OR</Text>
-                  <Button
-                    title="Click Photo"
-                    color="orange"
-                    onPress={() => handleGoldItemPhotoClick(index, "normal")}
-                  />
-                </View>
-                {goldItems[index]?.normal_photo ? (
-                  <Image
-                    source={{
-                      uri: `data:image/png;base64,${goldItems[index].normal_photo}`,
-                    }}
-                    style={{
-                      width: 100,
-                      height: 100,
-                      marginTop: 10,
-                      borderRadius: 10,
-                    }}
-                  />
-                ) : null}
-                </View>
-                <Text  className="text-normal">• Gold Iteam Weighted Photo</Text>
-                <View className="flex-row items-center justify-evenly p-3 mb-5">
-                <View className="flex-col w-40 justify-between mb-2 gap-1">
-                  <Button
-                    title="Photo Select"
-                    color="orange"
-                    onPress={() => handleGoldItemPhotoPick(index, "weighted")}
-                  />
-                  <Text className="text-center">OR</Text>
-                  <Button
-                    title="Click Photo"
-                    color="orange"
-                    onPress={() => handleGoldItemPhotoClick(index, "weighted")}
-                  />
-                </View>
-                {goldItems[index]?.weighted_photo ? (
-                  <Image
-                    source={{
-                      uri: `data:image/png;base64,${goldItems[index].weighted_photo}`,
-                    }}
-                    style={{
-                      width: 100,
-                      height: 100,
-                      marginTop: 10,
-                      borderRadius: 10,
-                    }}
-                  />
-                ) : null}
-                </View>
+                >
+                  <Text
+                    className={`${
+                      goldItems[index]?.item_type === category ? 'text-black' : 'text-black'
+                    }`}
+                  >
+                    {category}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View className="flex flex-row justify-evenly items-center my-4">
+              <View className="w-[40%]">
+
+            <Text             className="mt-3   bg-yellow  rounded-t-xl p-1" >Weight (grams)</Text>
+            <TextInput
+              className=" border border-white w-[100%] bg-white rounded-b-xl  p-2 text-center"
+              placeholder="Weight (grams)"
+              inputMode="numeric"
+              value={goldItems[index]?.weight?.toString() || ""}
+              onChangeText={(text) => {
+                const updatedGoldItems = [...goldItems];
+                updatedGoldItems[index] = {
+                  ...updatedGoldItems[index],
+                  weight: parseFloat(text) || 0,
+                };
+                setGoldItems(updatedGoldItems);
+              }}
+              keyboardType="numeric"
+            />
+              </View>
+              <View className="w-[40%]">
+              <Text className="text-black mt-4 p-1 rounded-t-xl text-center bg-yellow">Karat</Text>
+              <TextInput
+              className="mb-2 border border-white  bg-white w-[100%] rounded-b-xl p-2 text-center"
+              placeholder="Karat"
+              inputMode="numeric"
+              keyboardType="numeric"
+              value={goldItems[index]?.karat?.toString() || ""}
+              onChangeText={(text) => {
+                const updatedGoldItems = [...goldItems];
+                updatedGoldItems[index] = {
+                  ...updatedGoldItems[index],
+                  karat: Number(text) || 0,
+                };
+                setGoldItems(updatedGoldItems);
+              }}
+            />
+            </View>
+              </View>
+              
+       
+            <Text className="text-normal text-white mt-3">Photo 1</Text>
+            <View className="flex-row items-center justify-evenly p-2 mb-5">
+              <View className="flex-col w-40 justify-between mb-2 gap-1">
                 <Button
-                  title="Save Gold Item"
+                  title="photo select"
                   color="orange"
-                  onPress={() => handleSaveGoldItem(index, goldItems[index])}
+                  onPress={() => handleGoldItemPhotoPick(index, "normal")}
+                />
+                <Text className="text-center text-white">OR</Text>
+                <Button
+                  title="Click Photo"
+                  color="orange"
+                  onPress={() => handleGoldItemPhotoClick(index, "normal")}
                 />
               </View>
-            )
-          )}
-        </View>
-      )}
+              {goldItems[index]?.normal_photo ? (
+                <Image
+                  source={{
+                    uri: `data:image/png;base64,${goldItems[index].normal_photo}`,
+                  }}
+                  style={{
+                    width: 100,
+                    height: 100,
+                    marginTop: 10,
+                    borderRadius: 10,
+                  }}
+                />
+              ) : null}
+            </View>
+            <Text className="text-normal text-white">Photo 2</Text>
+            <View className="flex-row items-center justify-evenly p-2 mb-5">
+              <View className="flex-col w-40 justify-between mb-2 gap-1">
+                <Button
+                  title="Photo Select"
+                  color="orange"
+                  onPress={() => handleGoldItemPhotoPick(index, "weighted")}
+                />
+                <Text className="text-center text-white">OR</Text>
+                <Button
+                  title="Click Photo"
+                  color="orange"
+                  onPress={() => handleGoldItemPhotoClick(index, "weighted")}
+                />
+              </View>
+              {goldItems[index]?.weighted_photo ? (
+                <Image
+                  source={{
+                    uri: `data:image/png;base64,${goldItems[index].weighted_photo}`,
+                  }}
+                  style={{
+                    width: 100,
+                    height: 100,
+                    marginTop: 10,
+                    borderRadius: 10,
+                  }}
+                />
+              ) : null}
+            </View>
+            <View className="items-center">
+            <Text
+              className="bg-white text-black p-2  border-yellow border-2 rounded-xl w-1/2 text-center"
+              onPress={() => handleSaveGoldItem(index, goldItems[index])}
+            >Save Ornament</Text></View>
+          </View>
+        )
+      )
+    )}
+  </View>
+)}
+
     </ScrollView>
   );
 }

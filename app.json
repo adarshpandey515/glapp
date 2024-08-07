@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "my-goals-app",
-    "slug": "my-goals-app",
+    "name": "MJ",
+    "slug": "GoldLoan",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/mj.jpeg",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/images/mj.jpeg",
       "resizeMode": "contain",
-      "backgroundColor": "#0E0F11"
+      "backgroundColor": "#151515"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -20,15 +20,20 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#0E0F11"
+        "foregroundImage": "./assets/images/mj.jpeg",
+        "backgroundColor": "#151515"
       },
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+
       "package": "com.anonymous.mygoalsapp"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/mj.jpeg"
     },
     "plugins": [
       "expo-router",
@@ -36,6 +41,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "385b8b0b-9835-48f5-8cc9-344d7d5dd2d3"
+      }
     }
   }
 }
