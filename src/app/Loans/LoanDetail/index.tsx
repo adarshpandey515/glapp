@@ -5,18 +5,19 @@ import {useRepository} from '../../../database/query'; // Adjust the import path
 import { PaymentResponseDatabase ,GoldItemResponseDatabase} from '../../../database/query';
 import { printToFileAsync } from 'expo-print';
 import { shareAsync } from 'expo-sharing';
+import Nloader from '../../../components/loader';
 
 
+import { DeleteIcon, Download, Trash, Trash2Icon } from 'lucide-react-native';
 
-import { Download, DownloadIcon, SearchCheckIcon } from 'lucide-react-native';
-
-
+import { base64Image } from '@/components/ImgString';
 
 
 const LoanDetail = () => {
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const {getAllPaymentsByLoanId} = useRepository();
-  const {getAllGoldItemsByLoanId} = useRepository();
+  const {getAllGoldItemsByLoanId , deleteLoanAndRelatedData} = useRepository();
   const params = useLocalSearchParams();
   const loanDetails = JSON.parse(Array.isArray(params.loan) ? params.loan[0] : params.loan);
   // console.log(loanDetails);
@@ -39,12 +40,14 @@ const LoanDetail = () => {
 
   useEffect(( ) => {
     const fetchPayments = async () => {
+      setLoading(true)
       try {
         const loanPayments = getAllPaymentsByLoanId(loanDetails.loan_id);
         setPayments(loanPayments);
       } catch (error) {
         console.error('Failed to fetch payments:', error);
       }
+      setLoading(false)
     };
 
     fetchPayments();
@@ -52,7 +55,7 @@ const LoanDetail = () => {
 
 
   const generatePDF = async () => {
-   const htmlContent=`<!DOCTYPE html>
+    const htmlContent=`<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -84,26 +87,29 @@ const LoanDetail = () => {
         }
 
         .section {
-            border: 2px solid rgb(155, 102, 4);
+            border: 2px solid rgb(69, 67, 65);
             border-radius: 3%;
             padding: 6px;
             margin: 5px 0;
            
 
-            background-color:black;
+            background-color:rgb(255, 149, 0);
             width: 80%; /* Allow the section to expand */
         }
 
         .section h2 {
             padding: 2px;
             margin: 5px 20px;
-            color:yellow;
+            color:rgb(4, 42, 53);
         }
 
         .section p {
             font-size: medium;
             padding: 1px;
-            color:white;
+            color:black;
+            margin-bottom: 10px;
+            margin-left: 10px;
+            
         }
 
         .customer-photo, .gold-item-photo {
@@ -115,9 +121,10 @@ const LoanDetail = () => {
         }
 
         .gold-item-photo-large {
-            width: 300px;
-            height: 300px;
+            width: 200px;
+            height: 200px;
             margin: 10px;
+            border-radius: 10px;
         }
 
         .payment-details {
@@ -132,7 +139,7 @@ const LoanDetail = () => {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 100%;
+            width: 90%;
         
         }
     </style>
@@ -144,12 +151,15 @@ const LoanDetail = () => {
             <div style="display: flex; justify-content: center;">
                 <img src="data:image/png;base64,${loanDetails.photo}" class="customer-photo" alt="Customer Img"/>
             </div>
-            <h2>${loanDetails.name}</h2>
+            <h2 style="text-align: center;">${loanDetails.name}</h2>
+            <div style="margin: 1; display: grid;grid: auto-flow / 1fr 1fr 1fr;">
             <p>Customer ID: ${loanDetails.customer_id}</p>
             <p>Date of Birth: ${loanDetails.date_of_birth}</p>
             <p>Gender: ${loanDetails.gender}</p>
             <p>Marital Status: ${loanDetails.marital_status}</p>
             <p>PAN Number: ${loanDetails.pan_number}</p>
+            <p> Aadhar card Number: ${loanDetails.state}</p>
+
             <p>Address: ${loanDetails.address}</p>
             <p>Pincode: ${loanDetails.pincode}</p>
             <p>State: ${loanDetails.state}</p>
@@ -157,10 +167,14 @@ const LoanDetail = () => {
             <p>Email: ${loanDetails.email}</p>
             <p>Account Number: ${loanDetails.account_number}</p>
             <p>IFSC: ${loanDetails.IFSC}</p>
+            </div>
         </div>
 
         <h2>Loan Details</h2>
         <div class="section">
+            <div style="margin: 1; display: grid;grid: auto-flow / 1fr 1fr ;">
+
+            
             <p>Loan ID: ${loanDetails.loan_id}</p>
             <p>Loan Amount: ₹${loanDetails.loan_amount}</p>
             <p>Interest Rate: ${loanDetails.interest_rate}%</p>
@@ -170,7 +184,8 @@ const LoanDetail = () => {
             <p>Number of Gold Items: ${loanDetails.num_of_gold_items}</p>
             <p>Overdue Interest Rate: ${loanDetails.overdue_interest_rate}%</p>
             <p>Payment Date: ${loanDetails.payment_date}</p>
-            <p>Total Missed Payments: ${loanDetails.total_missed_payments}</p>
+            <p>Total Missed Payments: ${loanDetails.total_missed_payments}</p></div>
+            
         </div>
 
         <h2>Payments</h2>
@@ -187,14 +202,17 @@ const LoanDetail = () => {
         <h2>Gold Items</h2>
         <div class="section">
             ${goldItems.map(item => `
-                <div class="gold-item-details">
+
+                <div class="gold-item-details" >
+                    <div style="margin: 1; display: grid;grid: auto-flow / 1fr 1fr ;">
+
                     <p>Ornament no: ${item.gold_item_id}</p>
                     <p>Type: ${item.item_type}</p>
                     <p>Name: ${item.item_description}</p>
                     <p>Weight: ${item.weight} grams</p>
                     <p>Karat: ${item.karat}</p>
                     <p>No of pieces: ${item.num_pieces}</p>
-                  
+                  </div>
                 </div>
                 <div class="gold-item-photos">
                     <img src="data:image/png;base64,${item.weighted_photo}" class="gold-item-photo-large" alt=" Photo 1"/>
@@ -202,15 +220,19 @@ const LoanDetail = () => {
                 </div>
             `).join('')}
         </div>
+              <div class="gold-item-photos">
+                    <img src="data:image/png;base64,${base64Image}" class="gold-item-photo-large" alt=" Photo 1"/>
+                </div>
     </div>
 </body>
 </html>
 `
+    setLoading(true);
     try {
         const file = await printToFileAsync({
       html: htmlContent,
       base64: false,
-      height:2000,
+      height:670,
 
     });
 
@@ -219,24 +241,65 @@ const LoanDetail = () => {
       UTI: 'hello.pdf',
     }
     );
-
+    setLoading(false);
     } catch (error) {
       console.error('Failed to generate PDF:', error);
       Alert.alert('Error', 'Failed to generate PDF');
     }
   };
 
+  async function handleLoanDelete() {
+    Alert.alert(
+      'Delete Loan',
+      'Are you sure you want to delete this loan?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          onPress: async () => {
+            try {
+              // await deleteLoan(loanDetails.loan_id);
+              await deleteLoanAndRelatedData(loanDetails.loan_id);
 
+
+              Alert.alert('Success', 'Loan deleted successfully');
+              router.back();
+            } catch (error) {
+              console.error('Failed to delete loan:', error);
+              Alert.alert('Error', 'Failed to delete loan');
+            }
+          },
+        },
+      ],
+    );
+  }
+
+    if(loading){
+      return(
+  
+        <Nloader/>
+  
+      )
+    }
+
+  
   return (
     <View className='flex-1 '>
     <ScrollView className="flex-1 bg-white p-4">
+      <Button onPress={router.push('/addloan/')} >Back</Button>
+    <View className='flex flex-row items-center justify-end '>
+      <Text className="text-2xl text-right text-red-600 p-3 rounded-2xl" onPress={handleLoanDelete}> Delete Loan </Text>
+      <Trash2Icon size={20}  color="red" /></View>
       <View className="  mb-4">
       <View className="p-4 border-2 border-yellow rounded-xl mb-4">
       {loanDetails.photo && (
+        
         <View className='flex flex-row justify-between items-center'>
           <View>
-
-          <Text className="text-2xl text-yellow mb-2">{loanDetails.name}</Text>
+          <Text className="text-2xl text-[#121212] mb-2">{loanDetails.name.toUpperCase()}</Text>
           <Text className="text-lg text-black mb-1">Customer ID: {loanDetails.customer_id}</Text>
         <Text className="text-lg text-black mb-1">Date of Birth: {loanDetails.date_of_birth}</Text>
         <Text className="text-lg text-black mb-1">Gender: {loanDetails.gender}</Text>
@@ -256,6 +319,7 @@ const LoanDetail = () => {
         <Text className="text-lg text-black mb-1">State: {loanDetails.state}</Text>
         <Text className="text-lg text-black mb-1">Phone: {loanDetails.phone}</Text>
         <Text className="text-lg text-black mb-1">Email: {loanDetails.email}</Text>
+        <Text className="text-lg text-black mb-1">Addhar Card: {loanDetails.state}</Text>
         <Text className="text-lg text-black mb-1">Account Number: {loanDetails.account_number}</Text>
         <Text className="text-lg text-black mb-1">IFSC: {loanDetails.IFSC}</Text>
       </View>

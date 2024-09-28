@@ -76,7 +76,7 @@ export async function init(database: SQLiteDatabase) {
 
     INSERT INTO Shop (shop_id, shop_name, shop_address, shop_phone)
     SELECT 1, 'Adarsh', 'Vasai (E), VCET', '9004353415'
-    WHERE NOT EXISTS (SELECT 1 FROM Shop WHERE shop_id = 1);
+    WHERE NOT EXISTS (SELECT 1  FROM Shop WHERE shop_id = 1);
 
     `);
 }

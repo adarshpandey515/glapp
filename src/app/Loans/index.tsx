@@ -6,6 +6,7 @@ import { useRepository } from '../../database/query'; // Adjust the import path
 import { LoanResponseDatabaseWithCustomer } from '../../database/query';
 
 const LoanList = () => {
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [searchBy, setSearchBy] = useState<'loan_id' | 'customer_name'>('customer_name');
   const [loans, setLoans] = useState<LoanResponseDatabaseWithCustomer[]>([]);
@@ -30,6 +31,7 @@ const LoanList = () => {
 
   useEffect(() => {
     if (search) {
+      setLoading(true);
       setFilteredLoans(
         loans.filter(loan => {
           if (searchBy === 'loan_id') {
@@ -43,6 +45,8 @@ const LoanList = () => {
     } else {
       setFilteredLoans(loans);
     }
+      setLoading(false);
+  
   }, [search, loans, searchBy]);
   const navigateToLoanDetail = (loan:any) => {
     const params = new URLSearchParams({ loan: JSON.stringify(loan) });
@@ -50,6 +54,15 @@ const LoanList = () => {
     router.push(path);
   };
 
+  if(loading) {
+    return (
+      <View className="flex-1 p-2 bg-white">
+        <View className="flex flex-row items-center justify-center">
+          <Text className="text-lg text-black">Loading...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 p-2 bg-white">

@@ -64,7 +64,7 @@ export type CustomerResponseDatabase = {
   phone: string;
   email: string;
   account_number: string;
-  ifsc: string;
+  IFSC: string;
   photo: string;
   shop_id: number;
 };
@@ -227,7 +227,7 @@ export function useRepository() {
       const result = statement.executeSync({
         $loan_id: goldItem.loan_id,
         $item_description: goldItem.item_description,
-        $item_type: goldItem.item_type || "other",
+        $item_type: goldItem.item_type || "Other",
         $weight: goldItem.weight,
         $karat: goldItem.karat,
         $appraisal_value: goldItem.appraisal_value || -1,
@@ -316,6 +316,16 @@ export function useRepository() {
     }
   }
 
+  function getAllPayments(){
+    try {
+      return database.getAllSync<PaymentResponseDatabase>(`
+        SELECT * FROM Payment
+      `);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   function getAllPaymentsDueSoon() {
     try {
       return database.getAllSync<PaymentWithCustomerResponseDatabase>(`
@@ -335,11 +345,12 @@ export function useRepository() {
     }
   }
 
-  function updatePaymentStatus(paymentId: number, newStatus: string) {
+  function updatePaymentStatus(paymentId: number, newStatus: string,newtransaction_id:string) {
     try {
       const statement = database.prepareSync(`
         UPDATE Payment
-        SET status = $newStatus
+        SET status = $newStatus,
+            transaction_id = $newtransaction_id
         WHERE payment_id = $paymentId
       `);
 
@@ -450,6 +461,47 @@ export function useRepository() {
     }
   }
 
+
+   function deleteLoanAndRelatedData(loanId: number) {
+    try {
+      try {
+        const deletePaymentsStatement = database.prepareSync(`
+          DELETE FROM Payment WHERE gold_loan_id = $loanId
+        `);
+        deletePaymentsStatement.executeSync({ $loanId: loanId });
+        }catch (error) {
+          console.error(`Failed to delete payments for loan ID ${loanId}:`, error);
+          throw error;
+        }
+        // Delete related gold items
+        try {
+        const deleteGoldItemsStatement = database.prepareSync(`
+          DELETE FROM GoldItem WHERE loan_id = $loanId
+        `);
+        deleteGoldItemsStatement.executeSync({ $loanId: loanId });
+        }catch (error) {
+          console.error(`Failed to delete gold items for loan ID ${loanId}:`, error);
+          throw error;
+        }
+        // Delete the loan itself
+        try {
+        const deleteLoanStatement = database.prepareSync(`
+          DELETE FROM Loan WHERE loan_id = $loanId
+        `);
+        deleteLoanStatement.executeSync({ $loanId: loanId });
+        }catch (error) {
+          console.error(`Failed to delete loan ID ${loanId}:`, error);
+          throw error;
+        }
+
+      console.log(`Loan ID ${loanId} and its related data deleted successfully.`);
+    } catch (error) {
+      console.error(`Failed to delete loan ID ${loanId} and related data:`, error);
+      throw error;
+    }
+  }
+
+
   return {
     insertCustomer,
     insertLoan,
@@ -457,6 +509,7 @@ export function useRepository() {
     insertPayment,
     getAllCustomers,
     getAllLoans,
+    getAllPayments,
     getAllGoldItems,
     getAllPaymentsDueSoon,
     getAllPaymentsByLoanId,
@@ -467,5 +520,6 @@ export function useRepository() {
     countActiveLoans,
     countTotalCustomers,
     countPendingPayments,
+    deleteLoanAndRelatedData
   };
 }

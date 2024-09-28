@@ -7,7 +7,10 @@ import React, { useEffect, useState } from "react";
 import {
   HomeIcon,
   HandCoinsIcon,
-  ShoppingBagIcon
+  ShoppingBagIcon,
+  Import,
+  Expand,
+  FolderUpIcon
 } from "lucide-react-native";
 import { View, Text, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -42,6 +45,8 @@ function Footer() {
       setActiveMenu("Loans");
     } else if (currentSegment === "Store") {
       setActiveMenu("Store");
+    }else if(currentSegment=== "Export"){
+      setActiveMenu("Export");
     }
 
   }, [currentSegment]);
@@ -120,6 +125,19 @@ function Footer() {
           </View>
         </View>
       </TouchableOpacity>
+      {/* export */}
+      <TouchableOpacity
+        onPress={() => navigateTo("/Export")}
+        className="flex flex-col items-center justify-center px-0"
+      >
+        <View className={`px-5 py-1 rounded-full ${getMenuClass("Export")}`}>
+          <View className="flex items-center justify-center rounded-full" style={{ width: 50, height: 40 }}>
+            <FolderUpIcon size={20} color={getIconColor("Export")} fill={getFillColor("Export")} />
+            <Text className={`text-[10px] ${getTextClass("Export")}`}>Export</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+
     </View>
   );
 }

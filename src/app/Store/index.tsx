@@ -41,6 +41,11 @@ const GoldCategoryGrid = () => {
 
   return (
     <View className="flex-1 bg-white p-5 ">
+      {goldItems.length===0 && (
+        <View>
+          <Text>No Gold Ornaments are Saved or Not Found!</Text>
+        </View>
+      )}
       {!selectedCategory ? (
         <ScrollView>
           <View
@@ -61,6 +66,8 @@ const GoldCategoryGrid = () => {
                   className="w-[45%] max-w-[400px] m-1 rounded-2xl border-2 border-black p-[0px] bg-yellow -z-10 "
                   onPress={() => handleCategoryClick(category)}
                 >
+                  
+
                   <View className="w-auto items-center justify-evenly h-36">
                     <View className="items-center justify-center bg-white w-full h-full rounded-2xl">
                       {categoryImage ? (

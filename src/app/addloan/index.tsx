@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from "expo-image-picker";
+import * as Animatable from "react-native-animatable";
 import {
   useRepository,
   CustomerCreateDatabase,
@@ -332,11 +333,12 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
   endDate.getMonth() -
   startDate.getMonth();
 
-    console.log("month one s ",startDate,endDate,months)
+    // console.log("month one s ",startDate,endDate,months)
     const totalInterest = loan_amount * (interest_rate / 100) * (months / 12);
     let totalAmount = loan_amount + totalInterest;
     let monthlyPayment = totalAmount / months;
-
+    if(isNaN(monthlyPayment)) monthlyPayment=0;
+    if(isNaN(totalAmount)) totalAmount=0
     return {
       totalAmount,
       monthlyPayment,
@@ -443,7 +445,7 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
            <View className="flex-row">
       <Text
         className={`text-lg p-1 w-1/2 text-center rounded-t-3xl ${
-          isNewCustomer ? 'bg-black text-white' : 'bg-transparent text-black'
+          isNewCustomer ? 'bg-[#121212] text-white' : 'bg-transparent text-black'
         }`}
         onPress={() => setIsNewCustomer(true)}
       >
@@ -451,7 +453,7 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
       </Text>
       <Text
         className={`text-lg p-1 w-1/2 text-center rounded-t-3xl ${
-          !isNewCustomer ? 'bg-black text-white' : 'bg-transparent text-black'
+          !isNewCustomer ? 'bg-[#121212] text-white' : 'bg-transparent text-black'
         }`}
         onPress={() => setIsNewCustomer(false)}
       >
@@ -459,7 +461,7 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
       </Text>
     </View>
 
-    <View className={`bg-black mb-5 rounded-b-3xl ${isNewCustomer ? 'rounded-r-3xl' : 'rounded-l-3xl'}`}>
+    <View className={`bg-[#121212] mb-5 rounded-b-3xl ${isNewCustomer ? 'rounded-r-3xl' : 'rounded-l-3xl'}`}>
     {isNewCustomer ? (
           <View className="p-1 px-5 text-white">
             <Text className="text text-lg text-yellow  p-3">
@@ -508,7 +510,7 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
   
             <View className="flex-row my-3 bg-white  flex items-center  rounded-xl">
               <Text className=" rounded-l-xl text-start bg-yellow border border-yellow text-black p-3  mr-5">Gender</Text>
-              <View className="flex flex-row justify-between p-1">
+              <View className="flex flex-row justify-evenly p-1">
               <TouchableOpacity
                 onPress={() => setCustomerForm({ ...customerForm, gender: "M" })}
               >
@@ -553,15 +555,15 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
             </View>
   
             <View className="flex-row my-3 bg-white items-center  justify-between pr-5 rounded-xl">
-              <Text className=" px-3 mr-3 bg-yellow   p-2 border border-yellow rounded-l-xl">Marital Status</Text>
-              <View className="flex flex-row  justify-start">
+              <Text className=" px-3 mr-1 bg-yellow   p-2 border border-yellow rounded-l-xl">Marital Status</Text>
+              <View className="flex flex-row  justify-start items-center">
               <TouchableOpacity
                 onPress={() =>
                   setCustomerForm({ ...customerForm, marital_status: "married" })
                 }
               >
                 <Text
-                  className={`p-1 mr-4 border rounded-xl ${
+                  className={`p-1 mr-2 border rounded-xl ${
                     customerForm.marital_status === "married"
                       ? "bg-yellow"
                       : "border-gray-300"
@@ -667,11 +669,12 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
               className="mb-2  bg-white p-1  rounded-b-xl rounded-r-xl"
               placeholder="SBIN0043"
               value={customerForm.ifsc}
+              inputMode="text"
               onChangeText={(text) =>
                 setCustomerForm({ ...customerForm, ifsc: text })
               }
             />
-             <Text className="text-black p-1 mt-3 bg-yellow  w-[43%] text-center rounded-t-xl  ">Addhar Number</Text>
+             <Text className="text-black p-1 mt-3 bg-yellow  w-[43%] text-center rounded-t-xl  "> Aadhar  Number</Text>
              <TextInput
              keyboardType="numeric"
             inputMode="numeric"
@@ -713,16 +716,19 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
               ) : null}
             </View>
             <View className="my-2 pb-2 w-full  flex items-center ">
+            <Animatable.View animation="pulse" iterationCount="infinite" duration={1000} easing="ease-out" style={{ width: "100%", alignItems: "center" }}>
+
               <TouchableOpacity
               className="bg-yellow p-2 w-1/2 flex flex-row justify-evenly rounded-xl"
                 onPress={handleSaveCustomer}
               
               ><SaveAllIcon color="black"  size={20}></SaveAllIcon>
               <Text className="text-center"> Save Customer</Text></TouchableOpacity>
+              </Animatable.View>
             </View>
           </View>
         ) : (
-          <View className="bg-black p-1 px-4" style={{height:460}}>
+          <View className=" p-1 px-4" style={{height:460}}>
             <Text className="text-yellow">Search Customer</Text>
             <View className="flex   flex-row items-center mb-5 justify-between p-2 px-5 m-2 rounded-xl border-2 border-yellow">
               <TextInput
@@ -739,7 +745,7 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
                 onPress={() => handleCustomerSelect(customer)}
                 className="mx-2 rounded-lg p-1 flex-row justify-between items-center border-yellow border-2 "
               >
-                <Text className="mb-2 p-1 border  text-white rounded-xl  ">
+                <Text className=" p-1 text-xl  text-white ">
                   {customer.name}
                 </Text>
                 <Image
@@ -753,7 +759,7 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
               </TouchableOpacity>
             ))}
             {selectedCustomer && (
-              <View className="flex flex-col items-center justify-evenly">
+              <View className="flex flex-col mt-9 items-center justify-evenly">
                 <Image
                   source={{ uri: `data:image/png;base64,${selectedCustomer.photo}` }}
                   style={{
@@ -768,16 +774,21 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
                {selectedCustomer.name}
                 </Text>
                 <View>
-                  <Text>DOB: {selectedCustomer.date_of_birth}</Text>
+                  <Text className="text-white">DOB: {selectedCustomer.date_of_birth}</Text>
                 </View>
                 <View className="my-2 pb-2 w-full  flex items-center ">
             </View>
+
+            <Animatable.View animation="pulse" iterationCount="infinite" duration={1000} easing="ease-out" style={{ width: "100%", alignItems: "center" }}>
+
             <TouchableOpacity
             className="bg-yellow p-2 w-1/2 flex flex-row justify-evenly rounded-xl"
               onPress={handleSaveCustomer}
             
             >
             <Text className="text-center"> Next </Text></TouchableOpacity>
+            </Animatable.View>
+
             </View>
   
             )}
@@ -791,19 +802,19 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
 
         {LoanView && (
 
-      <View className="mt-4 items-center px-5 z-0 rounded-3xl"> 
+      <View className="mt-4 flex-1 items-center  px-5 z-0 rounded-3xl"> 
     
    <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center',justifyContent:"space-between" }}>
       <Text className="z-50 bg-black h-full  flex-grow rounded-t-3xl"></Text>
-      <Text className="p-1 rounded-b-3xl text-lg font-bold text-black bg-white text-center ">
+      <Text className="p-3 px-5  rounded-t-3xl text-lg font-bold text-black bg-yellow text-center ">
         Loan Details
       </Text>
       <Text className="z-100 bg-black h-full  rounded-t-3xl text-end flex-grow"></Text>
     </View>
-        <View className="bg-black rounded-b-3xl flex-grow w-full p-1 pt-4">
+        <View className="bg-black pt-7 rounded-b-3xl flex-grow w-full p-4">
 
         
-        <View className="flex flex-row   justify-evenly">
+        <View className="flex flex-row flex-1 gap-12   justify-between">
           <View className="w-auto ">
 
         <Text className="text-white p-1 rounded-t-xl bg-yellow">Loan Amount</Text>
@@ -832,7 +843,7 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
             </View>
         </View>
         <TouchableOpacity
-          className="flex items-center flex-row text-white  justify-evenly"
+          className="flex items-center  flex-row text-white  justify-between"
           onPress={() =>
             setShowDatePicker({ ...showDatePicker, loanStartDate: true })
           }
@@ -859,7 +870,7 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
         </View>
 
         <TouchableOpacity
-          className="flex flex-row justify-evenly text-white items-center"
+          className="flex flex-row justify-between text-white items-center"
           onPress={() =>
             setShowDatePicker({ ...showDatePicker, loanEndDate: true })
           }
@@ -881,7 +892,7 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
           />
         )}
 </View>
-        <View className="flex flex-row items-start justify-evenly gap-2 p-1">
+        <View className="flex flex-row items-start justify-between gap-2 p-1">
           <View>
 
           <Text className="text-white p-1 rounded-t-xl bg-yellow">Overdue Interest</Text>
@@ -915,14 +926,17 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
         </View>
         {/* <Text className="text-lg font-normal text-yellow mt-3">--{">"} Loan Calculation</Text> */}
         <Text className="mb-3 text-xl font-light text-center text-yellow mt-3">
-          Monthly Payment: {monthlyPayment.toFixed(2)}
+          Monthly Payment: {monthlyPayment.toFixed(2) || 0}
         </Text>
         <Text className="mb-3 text-xl font-light text-yellow text-center">
           Total Amount: {totalAmount.toFixed(2)}
         </Text>
+        <Animatable.View animation="pulse" iterationCount="infinite" duration={1000} easing="ease-out" style={{ width: "100%", alignItems: "center" }}>
+
         <View className=" rounded-b-xl items-center ">
           <Text  className="text-black border-yellow borderr-2  text-center w-1/3 bg-white p-3 items-center rounded-xl" onPress={handleSaveLoan} >Save Loan</Text>
         </View>
+        </Animatable.View>
       </View>
       </View>
         )}
@@ -1080,10 +1094,14 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
               ) : null}
             </View>
             <View className="items-center">
+            <Animatable.View animation="pulse" iterationCount="infinite" duration={1000} easing="ease-out" style={{ width: "100%", alignItems: "center" }}>
+
             <Text
               className="bg-white text-black p-2  border-yellow border-2 rounded-xl w-1/2 text-center"
               onPress={() => handleSaveGoldItem(index, goldItems[index])}
-            >Save Ornament</Text></View>
+            >Save Ornament</Text>
+            </Animatable.View>
+            </View>
           </View>
         )
       )

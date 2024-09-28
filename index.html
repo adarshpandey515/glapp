@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .container {
+            margin: 4%;
+            padding: 2%;
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
+            flex-direction: column;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            width: 95%;
+        }
+
+        .section {
+            border: 2px solid rgb(69, 67, 65);
+            border-radius: 3%;
+            padding: 6px;
+            margin: 5px 0;
+           
+
+            background-color:rgb(255, 149, 0);
+            width: 80%; /* Allow the section to expand */
+        }
+
+        .section h2 {
+            padding: 2px;
+            margin: 5px 20px;
+            color:rgb(4, 42, 53);
+        }
+
+        .section p {
+            font-size: medium;
+            padding: 1px;
+            color:black;
+            margin-bottom: 10px;
+            margin-left: 10px;
+            
+        }
+
+        .customer-photo, .gold-item-photo {
+            width: 150px;
+            height: 150px;
+            border-width: 2px;
+            border-radius: 10%;
+            border: 2px solid black;
+        }
+
+        .gold-item-photo-large {
+            width: 200px;
+            height: 200px;
+            margin: 10px;
+            border-radius: 10px;
+        }
+
+        .payment-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            font-size: small;
+        }
+
+        .gold-item-photos {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+        
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Customer Details</h1>
+        <div class="section">
+            <div style="display: flex; justify-content: center;">
+                <img src="data:image/png;base64,${loanDetails.photo}" class="customer-photo" alt="Customer Img"/>
+            </div>
+            <h2 style="text-align: center;">${loanDetails.name}</h2>
+            <div style="margin: 1; display: grid;grid: auto-flow / 1fr 1fr 1fr;">
+            <p>Customer ID: ${loanDetails.customer_id}</p>
+            <p>Date of Birth: ${loanDetails.date_of_birth}</p>
+            <p>Gender: ${loanDetails.gender}</p>
+            <p>Marital Status: ${loanDetails.marital_status}</p>
+            <p>PAN Number: ${loanDetails.pan_number}</p>
+            <p>Address: ${loanDetails.address}</p>
+            <p>Pincode: ${loanDetails.pincode}</p>
+            <p>State: ${loanDetails.state}</p>
+            <p>Phone: ${loanDetails.phone}</p>
+            <p>Email: ${loanDetails.email}</p>
+            <p>Account Number: ${loanDetails.account_number}</p>
+            <p>IFSC: ${loanDetails.IFSC}</p>
+            </div>
+        </div>
+
+        <h2>Loan Details</h2>
+        <div class="section">
+            <div style="margin: 1; display: grid;grid: auto-flow / 1fr 1fr ;">
+
+            
+            <p>Loan ID: ${loanDetails.loan_id}</p>
+            <p>Loan Amount: ₹${loanDetails.loan_amount}</p>
+            <p>Interest Rate: ${loanDetails.interest_rate}%</p>
+            <p>Start Date: ${loanDetails.start_date}</p>
+            <p>End Date: ${loanDetails.end_date}</p>
+            <p>Status: ${loanDetails.status}</p>
+            <p>Number of Gold Items: ${loanDetails.num_of_gold_items}</p>
+            <p>Overdue Interest Rate: ${loanDetails.overdue_interest_rate}%</p>
+            <p>Payment Date: ${loanDetails.payment_date}</p>
+            <p>Total Missed Payments: ${loanDetails.total_missed_payments}</p></div>
+        </div>
+
+        <h2>Payments</h2>
+        <div class="section">
+            ${payments.map(payment => `
+                <div class="payment-details">
+                    <p>₹${payment.amount.toFixed(3)}</p>
+                    <p> ${payment.payment_date}</p>
+                    <p> ${payment.status}</p>
+                </div>
+            `).join('')}
+        </div>
+
+        <h2>Gold Items</h2>
+        <div class="section">
+            ${goldItems.map(item => `
+
+                <div class="gold-item-details" >
+                    <div style="margin: 1; display: grid;grid: auto-flow / 1fr 1fr ;">
+
+                    <p>Ornament no: ${item.gold_item_id}</p>
+                    <p>Type: ${item.item_type}</p>
+                    <p>Name: ${item.item_description}</p>
+                    <p>Weight: ${item.weight} grams</p>
+                    <p>Karat: ${item.karat}</p>
+                    <p>No of pieces: ${item.num_pieces}</p>
+                  </div>
+                </div>
+                <div class="gold-item-photos">
+                    <img src="data:image/png;base64,${item.weighted_photo}" class="gold-item-photo-large" alt=" Photo 1"/>
+                    <img src="data:image/png;base64,${item.normal_photo}" class="gold-item-photo-large" alt=" Photo 2"/>
+                </div>
+            `).join('')}
+        </div>
+    </div>
+</body>
+</html>
