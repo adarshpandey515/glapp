@@ -26,7 +26,7 @@ import { Badge } from "react-native-paper";
 import { SaveAllIcon, SearchIcon } from "lucide-react-native";
 
 export default function AddLoan() {
-
+  let monthlyPaymentnumbers = 0;
   const [CustomerView, setCustomerView] = useState(true);
   const [LoanView, setLoanView] = useState(false);
 const [showGoldItemForm, setShowGoldItemForm] = useState(false);
@@ -240,8 +240,9 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
     (endDate.getFullYear() - startDate.getFullYear()) * 12 +
     endDate.getMonth() -
     startDate.getMonth();
-    
-    console.log(startDate,endDate,months);
+
+
+    // console.log(startDate,endDate,months);
     if(months <= 0){
       let paymentDate = new Date(endDate);
       const paymentForm: PaymentCreateDatabase = {
@@ -292,7 +293,7 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
       return;
     }
     
-
+    
     if (
       !goldItemForm.item_description ||
       !goldItemForm.weight ||
@@ -333,10 +334,12 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
   endDate.getMonth() -
   startDate.getMonth();
 
-    // console.log("month one s ",startDate,endDate,months)
-    const totalInterest = loan_amount * (interest_rate / 100) * (months / 12);
-    let totalAmount = loan_amount + totalInterest;
-    let monthlyPayment = totalAmount / months;
+    console.log("month one s ",startDate,endDate,months)
+    monthlyPaymentnumbers = months;
+    if(isNaN(monthlyPaymentnumbers)) monthlyPaymentnumbers=0;
+    // const totalInterest = loan_amount * (interest_rate / 100) * (months / 12);
+    let totalAmount = loan_amount ;
+    let monthlyPayment = (Number)((totalAmount *interest_rate)/100);
     if(isNaN(monthlyPayment)) monthlyPayment=0;
     if(isNaN(totalAmount)) totalAmount=0
     return {
@@ -929,7 +932,8 @@ const [showGoldItemForm, setShowGoldItemForm] = useState(false);
           Monthly Payment: {monthlyPayment.toFixed(2) || 0}
         </Text>
         <Text className="mb-3 text-xl font-light text-yellow text-center">
-          Total Amount: {totalAmount.toFixed(2)}
+          Number of Months: {monthlyPaymentnumbers}
+         
         </Text>
         <Animatable.View animation="pulse" iterationCount="infinite" duration={1000} easing="ease-out" style={{ width: "100%", alignItems: "center" }}>
 

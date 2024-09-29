@@ -122,9 +122,9 @@ export function Statics() {
 }
 export function TopCard() {
   return (
-    <View className="bg-[#121212]  flex flex-row iteam-center justify-center w-auto h-[26%] m-2  rounded-3xl ">
+    <View className="border-black border-2 text-black flex flex-row iteam-center justify-center w-auto h-[26%] m-2  rounded-3xl ">
       <View className="p-1 flex flex-col  justify-evenly items-center  h-[100%] w-[50%]">
-        <View className="  border p-1  border-yellow bg-[#151515] rounded-2xl">
+        <View className="  border p-1  border-yellow bg-[#000000] rounded-2xl">
           <MJphoto/>
         </View>
       </View>
@@ -133,18 +133,18 @@ export function TopCard() {
           Milan Jewellers
         </Text>
         <View className=" flex flex-row iteam-center justify-evenly">
-          <MapPin size={20} color="white"  style={{ marginTop: 3 }} />
+          <MapPin size={20} color="black"  style={{ marginTop: 3 }} />
           <View className="w-[100%] px-2 h-auto  flex">
 
-            <Text className="text-sm text-[#fffeee]  
-            text-justify px-1  font-light flex ">
-            kajupada Borivali East
+            <Text className="text-sm 
+            text-justify px-1 text-black font-light flex ">
+            kajupada,Borivali (East)
             </Text>
           </View>
         </View>
         <View className=" flex flex-row text-[#fffeee] iteam-center justify-evenly">
-          <PhoneCall size={20} color="white" style={{ top: 4 }} />
-          <Text className="text-light font-light text-white px-2 py-1">+91 9892562381</Text>
+          <PhoneCall size={20} color="black" style={{ top: 4 }} />
+          <Text className="text-light font-light text-black px-2 py-1">+91 9892562381</Text>
         </View>
       </View>
     </View>

@@ -302,7 +302,7 @@ export function ShowPayment() {
         <Text>Generating and sharing the PDF...</Text>
       </View>
     )}
-      <Text className=" text-center border -top-4 rounded-full text-md font-normal p-3 bg-[#121212] text-white">
+      <Text className=" text-center border -top-4 rounded-full text-md font-normal p-3  text-black">
         Upcoming Payments
       </Text>
       <ScrollView className="w-full">

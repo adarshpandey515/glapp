@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+const htmlContent=`<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -17,42 +17,39 @@
         }
 
         .container {
-            margin: 4%;
-            padding: 2%;
+          
             display: flex;
             align-items: center;
             justify-content: space-evenly;
             flex-direction: column;
             background-color: #fff;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            border-radius: 10px;
-            width: 95%;
+        
+            
+           width: 98%;
         }
 
         .section {
             border: 2px solid rgb(69, 67, 65);
             border-radius: 3%;
-            padding: 6px;
-            margin: 5px 0;
-           
-
-            background-color:rgb(255, 149, 0);
-            width: 80%; /* Allow the section to expand */
+            padding-bottom: 6px;
+            padding: 4px;
+            height: 768px;
+            width: 100%;
         }
 
         .section h2 {
             padding: 2px;
             margin: 5px 20px;
             color:rgb(4, 42, 53);
+            text-align: center;
         }
 
+    
         .section p {
             font-size: medium;
-            padding: 1px;
-            color:black;
-            margin-bottom: 10px;
-            margin-left: 10px;
-            
+            padding-left: 50px;
+            padding-right: 50px;
+            color:black;    
         }
 
         .customer-photo, .gold-item-photo {
@@ -75,12 +72,12 @@
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            font-size: small;
+            font-size: x-small;
         }
 
         .gold-item-photos {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             width: 90%;
         
@@ -89,77 +86,145 @@
 </head>
 <body>
     <div class="container">
-        <h1>Customer Details</h1>
+
         <div class="section">
+            <h2>Customer Details</h2>
             <div style="display: flex; justify-content: center;">
                 <img src="data:image/png;base64,${loanDetails.photo}" class="customer-photo" alt="Customer Img"/>
             </div>
             <h2 style="text-align: center;">${loanDetails.name}</h2>
-            <div style="margin: 1; display: grid;grid: auto-flow / 1fr 1fr 1fr;">
-            <p>Customer ID: ${loanDetails.customer_id}</p>
-            <p>Date of Birth: ${loanDetails.date_of_birth}</p>
+            <div >
+                <div style="display: flex; justify-content:space-between;">
+                    <p>Customer ID: ${loanDetails.customer_id}</p>
+                    <p>Date of Birth: ${loanDetails.date_of_birth}</p>
+                </div>
+                <div style="display: flex; justify-content:space-between;">
+
             <p>Gender: ${loanDetails.gender}</p>
             <p>Marital Status: ${loanDetails.marital_status}</p>
+            </div>
+            <div style="display: flex; justify-content:space-between;">
+
             <p>PAN Number: ${loanDetails.pan_number}</p>
-            <p>Address: ${loanDetails.address}</p>
-            <p>Pincode: ${loanDetails.pincode}</p>
+            <p> Aadhar card Number: ${loanDetails.state}</p>
+            </div>
+            <div style="display: flex; justify-content:space-between;">
+
+
+                <p>Address: ${loanDetails.address}</p>
+                <p>Pincode: ${loanDetails.pincode}</p>
+            </div>
+            <div style="display: flex; justify-content:space-between;">
             <p>State: ${loanDetails.state}</p>
             <p>Phone: ${loanDetails.phone}</p>
+            </div>
+            <div style="display: flex; justify-content:space-between;">
+
             <p>Email: ${loanDetails.email}</p>
+            
             <p>Account Number: ${loanDetails.account_number}</p>
+            </div>
             <p>IFSC: ${loanDetails.IFSC}</p>
             </div>
         </div>
 
-        <h2>Loan Details</h2>
         <div class="section">
-            <div style="margin: 1; display: grid;grid: auto-flow / 1fr 1fr ;">
+            <h2>Loan Details</h2>
+            <div>
 
-            
+                <div style="display: flex; justify-content:space-between;">
+
             <p>Loan ID: ${loanDetails.loan_id}</p>
             <p>Loan Amount: ₹${loanDetails.loan_amount}</p>
+            </div>
+            <div style="display: flex; justify-content:space-between;">
+
             <p>Interest Rate: ${loanDetails.interest_rate}%</p>
             <p>Start Date: ${loanDetails.start_date}</p>
+            </div>
+            <div style="display: flex; justify-content:space-between;">
+
             <p>End Date: ${loanDetails.end_date}</p>
             <p>Status: ${loanDetails.status}</p>
+            </div>
+            <div style="display: flex; justify-content:space-between;">
             <p>Number of Gold Items: ${loanDetails.num_of_gold_items}</p>
             <p>Overdue Interest Rate: ${loanDetails.overdue_interest_rate}%</p>
+            </div>
+            <div style="display: flex; justify-content:space-between;">
             <p>Payment Date: ${loanDetails.payment_date}</p>
-            <p>Total Missed Payments: ${loanDetails.total_missed_payments}</p></div>
+            <p>Total Missed Payments: ${loanDetails.total_missed_payments}</p>
+            </div>
+        </div>
+            <div>
+                ${payments.map(payment => `
+                    <div class="payment-details">
+                        <p>₹${payment.amount.toFixed(3)}</p>
+                        <p> ${payment.payment_date}</p>
+                        <p> ${payment.status}</p>
+                    </div>
+                `).join('')}
+            </div>
         </div>
 
-        <h2>Payments</h2>
-        <div class="section">
-            ${payments.map(payment => `
-                <div class="payment-details">
-                    <p>₹${payment.amount.toFixed(3)}</p>
-                    <p> ${payment.payment_date}</p>
-                    <p> ${payment.status}</p>
-                </div>
-            `).join('')}
-        </div>
+     
 
-        <h2>Gold Items</h2>
-        <div class="section">
-            ${goldItems.map(item => `
+        ${goldItems.map(item => `
+            <div class="section">
+                <h2>Gold Items</h2>
 
-                <div class="gold-item-details" >
-                    <div style="margin: 1; display: grid;grid: auto-flow / 1fr 1fr ;">
+                <div class="gold-item-details " style="padding-bottom: 50px;" >
+                    <div style="display: flex; justify-content:space-between;">
 
-                    <p>Ornament no: ${item.gold_item_id}</p>
-                    <p>Type: ${item.item_type}</p>
+                        <p>Ornament no: ${item.gold_item_id}</p>
+                        <p>Type: ${item.item_type}</p>
+                    </div>
+                    <div style="display: flex; justify-content:space-between;">
+
                     <p>Name: ${item.item_description}</p>
                     <p>Weight: ${item.weight} grams</p>
+                    </div>
+                    <div style="display: flex; justify-content:space-between;">
+
                     <p>Karat: ${item.karat}</p>
                     <p>No of pieces: ${item.num_pieces}</p>
-                  </div>
+                    </div>
+                  
                 </div>
-                <div class="gold-item-photos">
+                 <div style="display: flex; justify-content:space-evenly; margin-top: 50px;">
+
                     <img src="data:image/png;base64,${item.weighted_photo}" class="gold-item-photo-large" alt=" Photo 1"/>
                     <img src="data:image/png;base64,${item.normal_photo}" class="gold-item-photo-large" alt=" Photo 2"/>
                 </div>
+            </div>
             `).join('')}
-        </div>
+                <div class="section">
+                    <div class="gold-item-photos" >
+                        <img src="data:image/png;base64,${base64Image}" class="gold-item-photo-large" alt=" Photo 1"/>
+                    </div>
+                    <h2 style="padding-bottom: 30px;">Milan Jewellers</h2>
+                    <p>
+                        Email:milan@gmail.com
+                    <p> 
+                        Phone no:
+                        <contact>
+                            +91 9892562381
+                        </contact>
+                    </p>
+                    <p style="font-style: italic;">
+
+                        Address:
+                      
+            kajupada,Borivali (East)
+
+                        
+                    </p>
+                    <div class="gold-item-photos" style="padding-top: 20px;" >
+                        <img src="data:image/png;base64,${base64Image}" class="gold-item-photo-large" alt=" Photo 1"/>
+                    </div>
+                    <h2 style="padding-bottom: 50px;">Scan for Payment</h2>
+                </div>
     </div>
 </body>
 </html>
+`
