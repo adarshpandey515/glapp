@@ -1,18 +1,7 @@
-# My Goals
+
 
 ![My Goals Logo](./assets/images/icon.png)
 
-**My Goals** is a practical app designed to help users save up for specific goals, such as purchasing a new notebook. Edson, for example, aims to buy a notebook priced at R$ 5,000. He finds it wise to save up the necessary funds to make the purchase outright, securing a good deal and avoiding the burden of monthly installments. With the My Goals App, he can set a savings goal and track his progress until he reaches the desired amount. This project was developed as part of a hands-on session during the React Native in Practice event (Rocketseat), leveraging Expo for streamlined cross-platform development.
-
-## Credits
-
-This project was developed based on the knowledge acquired through courses and educational materials provided by [rocketseat](https://www.rocketseat.com.br). Rockseat offers a wide range of high-quality courses and content for developers in various areas, including design, programming, and app development.
-
-We would like to thank the Rockseat team for providing valuable educational resources that contributed to the development of this project.
-
-For more information about the courses and materials offered by Rockseat, please visit the official website at [rocketseat](https://www.rocketseat.com.br).
-
-🎨 [Figma do projeto](https://www.figma.com/community/file/1346604660147063430/mygoals-app)
 
 ## Technology
 
@@ -77,13 +66,4 @@ To run the app locally, follow these steps:
 
 You are welcome to contribute to the development of this project. If you find bugs, wish to add new features, or improve usability, feel free to open an issue or submit a pull request.
 
-## Contact
 
-- Name: Edson Camargo Menezes
-- Email: contact@edsoncamargo.dev
-
-## Acknowledgments
-
-Special thanks to everyone who contributed to making this app a reality, especially Rocketseat for their invaluable support and guidance throughout the development process. Your expertise and dedication have been instrumental in bringing this project to fruition.
-
-Enjoy using **My Goals App!**
